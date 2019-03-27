@@ -203,7 +203,7 @@ Voltage CPUs::readVoltage(MicroCom::Pins pin){
  - Function：read the value of the InnerRegister
  - Calls：
  - Called By：
- - Input：[MicroCom::inReg]
+ - Input：[MicroCom::Reg]
  - Output：
  - Return：内部寄存器号为inReg的寄存器的值(8或16位)
 *****************************************************/
@@ -266,7 +266,7 @@ short CPUs::readInnerReg(MicroCom::Regs inReg){
  - Description：
  - Calls：
  - Called By：
- - Input：[MicroCom::inReg]
+ - Input：[MicroCom::Regs]
  - Output：
  - Return：内部寄存器号为inReg的寄存器的值(8或16位)
 *****************************************************/
@@ -328,5 +328,14 @@ short CPUs::readInnerReg(MicroCom::Regs inReg, short pos){
     }
 }
 
+/****************************************************
+ - Function：set the value of the inner register
+ - Description：
+ - Calls：
+ - Called By：
+ - Input：[MicroCom::Regs]
+ - Output：
+ - Return：内部寄存器号为inReg的寄存器的值(8或16位)
+*****************************************************/
 void setInnerReg(MicroCom::Regs reg, short value);
 void setInnerReg(MicroCom::Regs reg, short biValue, short pos);

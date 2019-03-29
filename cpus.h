@@ -9,20 +9,20 @@ class CPUs : public Hardwares
 public:
     CPUs();
 private:
-    short ax;
-    short bx;
-    short cx;
-    short dx;
-    short cs;
-    short ds;
-    short es;
-    short ss;
-    short bp;
-    short sp;
-    short si;
-    short di;
-    short ip;
-    short flags;
+    unsigned short ax;
+    unsigned short bx;
+    unsigned short cx;
+    unsigned short dx;
+    unsigned short cs;
+    unsigned short ds;
+    unsigned short es;
+    unsigned short ss;
+    unsigned short bp;
+    unsigned short sp;
+    unsigned short si;
+    unsigned short di;
+    unsigned short ip;
+    unsigned short flags;
     Voltage AD[16];
     Voltage AS[4];
     Voltage Mio;
@@ -48,8 +48,8 @@ public:
     bool setVoltage(MicroCom::Pins pin, Voltage pinVol);
 
     //read Registers value
-    short readInnerReg(MicroCom::Regs reg);
-    short readInnerReg(MicroCom::Regs reg, short pos);
+    unsigned short readInnerReg(MicroCom::Regs reg);
+    Voltage readInnerReg(MicroCom::Regs reg, short pos);
 
     //set Registers value
     void setInnerReg(MicroCom::Regs reg, short value);

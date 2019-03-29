@@ -10,12 +10,12 @@ CPUs::CPUs()
 }
 
 /****************************************************
- - Function：设置8086CPU的引脚电平
- - Calls：无
+ - Function: set the pin's voltage of 8086 CPU
+ - Calls：
  - Called By：
- - Input：MicroCom::Pins pin(引脚号)、Voltage pinVol(引脚电平)
- - Output：引脚号为pin的引脚电平改变为pinVol
- - Return：
+ - Input：[MicroCom::Pins pin]、[Voltage pinVol(引脚电平)]
+ - Output：
+ - Return：if succeed, return true; else return false
 *****************************************************/
 bool CPUs::setVoltage(MicroCom::Pins pin, Voltage pinVol){
     if(pinVol!=high && pinVol!=low){
@@ -122,12 +122,12 @@ bool CPUs::setVoltage(MicroCom::Pins pin, Voltage pinVol){
 }
 
 /****************************************************
- - Function：读取8086CPU引脚电平的值
- - Calls：无
+ - Function：read the pin's voltage of 8086 CPU
+ - Calls：
  - Called By：
- - Input：MicroCom::Pins pin(引脚号)
+ - Input：[MicroCom::Pins pin]
  - Output：
- - Return：引脚号为Pin的引脚电平值
+ - Return：pin's voltage(high or low)
 *****************************************************/
 Voltage CPUs::readVoltage(MicroCom::Pins pin){
     switch(pin){
@@ -200,15 +200,15 @@ Voltage CPUs::readVoltage(MicroCom::Pins pin){
 
 
 /****************************************************
- - Function：read the value of the InnerRegister
+ - Function：read the register's value
  - Calls：
- - Called By：
+ - Called By：readInnerReg(MicroCom::Regs reg,short pos)
  - Input：[MicroCom::Reg]
  - Output：
- - Return：内部寄存器号为inReg的寄存器的值(8或16位)
+ - Return：内部寄存器号为reg的寄存器的值(8或16位)
 *****************************************************/
-short CPUs::readInnerReg(MicroCom::Regs inReg){
-    switch(inReg){
+unsigned short CPUs::readInnerReg(MicroCom::Regs reg){
+    switch(reg){
     //16-bit register
     case MicroCom::ax:
         return ax;
@@ -256,56 +256,96 @@ short CPUs::readInnerReg(MicroCom::Regs inReg){
     case MicroCom::dl:
         return (dx & 0x00ff);
     default:
-        return himped;
+        return 0;
     }
 }
 
 /****************************************************
- - Function：read Register value in particular position
+ - Function：read register's value in a particular position
+ - Description：pos limit(16-bit:0-15 8-bit:0-7)
+ - Calls：readInnerReg(MicroCom::Regs reg)
+ - Called By：
+ - Input：[MicroCom::Regs]
+ - Output：register value with complement form
+ - Return：内部寄存器号为reg的寄存器的值(8或16位)
+*****************************************************/
+Voltage CPUs::readInnerReg(MicroCom::Regs reg, short pos){
+    unsigned short flag = 1;
+    Voltage value = himped;
+    flag = flag << pos;
+    unsigned short rst = readInnerReg(reg);
+    if((rst & flag)>0){
+        return high;
+    }
+    else{
+        return low;
+    }
+}
+
+/****************************************************
+ - Function：set register's value
  - Description：
  - Calls：
  - Called By：
  - Input：[MicroCom::Regs]
  - Output：
- - Return：内部寄存器号为inReg的寄存器的值(8或16位)
+ - Return：内部寄存器号为reg的寄存器的值(8或16位)
 *****************************************************/
-short CPUs::readInnerReg(MicroCom::Regs inReg, short pos){
-    if(inReg>0 && inReg<15){
-        if(pos>16 || pos<1){
-            qDebug()<<"位置错啦！";
-        }
+void CPUs::setInnerReg(MicroCom::Regs reg, short value){
+    unsigned short cValue = 0;
+    if(reg<15){
+        //将value转换为unsigned形式的补码cValue，由于是16位寄存器，不必填寄存器长度参数
+        //toCompForm(short value);
     }
-    switch(inReg){
-    //16位寄存器
+    else{
+        //将value转换为unsigned形式的补码cValue
+        //toCompForm(short value, MicroCom::byte)
+    }
+    switch(reg){
+    //16-bit register
     case MicroCom::ax:
-        return ax;
+        ax = cValue;
+        break;
     case MicroCom::bx:
-        return bx;
+        bx = cValue;
+        break;
     case MicroCom::cx:
-        return cx;
+        cx = cValue;
+        break;
     case MicroCom::dx:
-        return dx;
+        dx = cValue;
+        break;
     case MicroCom::cs:
-        return ax;
+        cs = cValue;
+        break;
     case MicroCom::ds:
-        return ax;
+        ds = cValue;
+        break;
     case MicroCom::es:
-        return ax;
+        es = cValue;
+        break;
     case MicroCom::ss:
-        return ax;
+        ss = cValue;
+        break;
     case MicroCom::bp:
-        return ax;
+        bp = cValue;
+        break;
     case MicroCom::sp:
-        return ax;
+        sp = cValue;
+        break;
     case MicroCom::si:
-        return ax;
+        si = cValue;
+        break;
     case MicroCom::di:
-        return ax;
+        di = cValue;
+        break;
     case MicroCom::ip:
-        return ax;
+        ip = cValue;
+        break;
     case MicroCom::flags:
-        return ax;
-    //8位寄存器
+        flags = cValue;
+        break;
+    //8-bit register
     case MicroCom::ah:
         return (ax >> 8);
     case MicroCom::al:
@@ -323,12 +363,13 @@ short CPUs::readInnerReg(MicroCom::Regs inReg, short pos){
     case MicroCom::dl:
         return (dx & 0x00ff);
     default:
-        return himped;
+        return 0;
     }
-}
+};
+
 
 /****************************************************
- - Function：set inner register value
+ - Function：set the register's value
  - Description：
  - Calls：
  - Called By：
@@ -336,8 +377,9 @@ short CPUs::readInnerReg(MicroCom::Regs inReg, short pos){
  - Output：
  - Return：内部寄存器号为reg的寄存器的值(8或16位)
 *****************************************************/
-void setInnerReg(MicroCom::Regs reg, short value);
-void setInnerReg(MicroCom::Regs reg, short biValue, short pos);
+void setInnerReg(MicroCom::Regs reg, Voltage biValue, short pos);
+
+
 
 
 

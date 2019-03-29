@@ -1,7 +1,6 @@
 #ifndef DATATYPE_H
 #define DATATYPE_H
 
-#define INIF 0;
 namespace MicroCom{
 //引脚号
 enum Pins{
@@ -66,7 +65,14 @@ enum Regs{
     ch=19,
     cl=20,
     dh=21,
-    dl=22
+    dl=22,
+    io=23,   //8255A
+    ct=24   //counter 8253/8254
+};
+
+enum RegsLen{
+    dbyte=16,
+    byte=8
 };
 }
 

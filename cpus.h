@@ -41,13 +41,25 @@ private:
     Voltage CLK;
 
 public:
+    //read Pins voltage
     Voltage readVoltage(MicroCom::Pins pin);
-    bool setVoltage(MicroCom::Pins pin, Voltage pinVol);
-    short readInnerReg(MicroCom::Regs inReg);
-    short readInnerReg(MicroCom::Regs inReg, short pos);
-    void setInnerReg(MicroCom::Regs inReg, short value);
-    void setInnerReg(MicroCom::Regs inReg, short biValue, short pos);
 
+    //set Pins voltage
+    bool setVoltage(MicroCom::Pins pin, Voltage pinVol);
+
+    //read Registers value
+    short readInnerReg(MicroCom::Regs reg);
+    short readInnerReg(MicroCom::Regs reg, short pos);
+
+    //set Registers value
+    void setInnerReg(MicroCom::Regs reg, short value);
+    void setInnerReg(MicroCom::Regs reg, short biValue, short pos);
+
+    //True Form(原码) to Complement Form(补码)
+    unsigned short toCompForm(short value, MicroCom::RegsLen len = MicroCom::dbyte);
+
+    //Complement Form to True Form 默认长度为16位
+    short toTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
 };
 
 #endif // CPUS_H

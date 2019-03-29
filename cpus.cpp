@@ -261,8 +261,7 @@ short CPUs::readInnerReg(MicroCom::Regs inReg){
 }
 
 /****************************************************
- - Function：read the value of the InnerRegister
-             in particular position
+ - Function：read Register value in particular position
  - Description：
  - Calls：
  - Called By：
@@ -329,13 +328,58 @@ short CPUs::readInnerReg(MicroCom::Regs inReg, short pos){
 }
 
 /****************************************************
- - Function：set the value of the inner register
+ - Function：set inner register value
  - Description：
  - Calls：
  - Called By：
  - Input：[MicroCom::Regs]
  - Output：
- - Return：内部寄存器号为inReg的寄存器的值(8或16位)
+ - Return：内部寄存器号为reg的寄存器的值(8或16位)
 *****************************************************/
 void setInnerReg(MicroCom::Regs reg, short value);
 void setInnerReg(MicroCom::Regs reg, short biValue, short pos);
+
+
+
+/****************************************************
+ - Function：True Form to Complement Form
+ - Description：The default length of regs is double byte
+ - Calls：
+ - Called By：
+ - Input：[value(true form), MicroCom::RegsLen]
+ - Output：
+ - Return：value(complement form)[unsignde short]
+*****************************************************/
+unsigned short toCompForm(short value, MicroCom::RegsLen len = MicroCom::dbyte){
+    //16-bit register
+    if(len==MicroCom::dbyte){
+        if(value<0){
+            return static_cast<int>(value);
+        }
+        else {
+            return value;
+        }
+    }
+    //8-bit register
+    else{
+        if(value<0){
+
+        }
+    }
+}
+
+
+/****************************************************
+ - Function：Complement Form to True Form
+ - Description：The default length of regs is double byte
+ - Calls：
+ - Called By：
+ - Input：[value(complement form), MicroCom::RegsLen]
+ - Output：
+ - Return：内部寄存器号为inReg的寄存器的值(8或16位)
+*****************************************************/
+
+
+
+//Complement Form to True Form 默认长度为16位
+short toTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);

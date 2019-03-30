@@ -5,7 +5,7 @@ CPUs::CPUs()
 {
     bool judge = setVoltage(MicroCom::rd, low);
     qDebug()<<"isSuccess?"<<judge;
-    short ax = readInnerReg(MicroCom::ax);
+    unsigned short ax = getRegValue(MicroCom::ax);
     qDebug()<<"ax="<<ax;
 }
 
@@ -122,14 +122,14 @@ bool CPUs::setVoltage(MicroCom::Pins pin, Voltage pinVol){
 }
 
 /****************************************************
- - Function：read the pin's voltage of 8086 CPU
+ - Function：get the pin's voltage of 8086 CPU
  - Calls：
  - Called By：
  - Input：[MicroCom::Pins pin]
  - Output：
  - Return：pin's voltage(high or low)
 *****************************************************/
-Voltage CPUs::readVoltage(MicroCom::Pins pin){
+Voltage CPUs::getPinVoltage(MicroCom::Pins pin){
     switch(pin){
     case MicroCom::AD1:
         return AD[0];
@@ -198,16 +198,15 @@ Voltage CPUs::readVoltage(MicroCom::Pins pin){
     }
 }
 
-
 /****************************************************
- - Function：read the register's value
+ - Function：get the register's value
  - Calls：
- - Called By：readInnerReg(MicroCom::Regs reg,short pos)
+ - Called By：getRegValue(MicroCom::Regs reg,short pos)
  - Input：[MicroCom::Reg]
  - Output：
  - Return：内部寄存器号为reg的寄存器的值(8或16位)
 *****************************************************/
-unsigned short CPUs::readInnerReg(MicroCom::Regs reg){
+unsigned short CPUs::getRegValue(MicroCom::Regs reg){
     switch(reg){
     //16-bit register
     case MicroCom::ax:
@@ -261,19 +260,18 @@ unsigned short CPUs::readInnerReg(MicroCom::Regs reg){
 }
 
 /****************************************************
- - Function：read register's value in a particular position
+ - Function：get the register's value in a particular position
  - Description：pos limit(16-bit:0-15 8-bit:0-7)
- - Calls：readInnerReg(MicroCom::Regs reg)
+ - Calls：getRegValue(MicroCom::Regs reg)
  - Called By：
  - Input：[MicroCom::Regs]
  - Output：register value with complement form
  - Return：内部寄存器号为reg的寄存器的值(8或16位)
 *****************************************************/
-Voltage CPUs::readInnerReg(MicroCom::Regs reg, short pos){
+Voltage CPUs::getRegValue(MicroCom::Regs reg, short pos){
     unsigned short flag = 1;
-    Voltage value = himped;
-    flag = flag << pos;
-    unsigned short rst = readInnerReg(reg);
+    flag <<= pos;
+    unsigned short rst = getRegValue(reg);
     if((rst & flag)>0){
         return high;
     }
@@ -291,15 +289,13 @@ Voltage CPUs::readInnerReg(MicroCom::Regs reg, short pos){
  - Output：
  - Return：内部寄存器号为reg的寄存器的值(8或16位)
 *****************************************************/
-void CPUs::setInnerReg(MicroCom::Regs reg, short value){
+void CPUs::setRegValue(MicroCom::Regs reg, short value){
     unsigned short cValue = 0;
-    if(reg<15){
-        //将value转换为unsigned形式的补码cValue，由于是16位寄存器，不必填寄存器长度参数
-        //toCompForm(short value);
+    if(reg>0 && reg<15){
+        cValue = toCompForm(value);
     }
     else{
-        //将value转换为unsigned形式的补码cValue
-        //toCompForm(short value, MicroCom::byte)
+        cValue = toCompForm(value,MicroCom::byte);
     }
     switch(reg){
     //16-bit register
@@ -347,81 +343,237 @@ void CPUs::setInnerReg(MicroCom::Regs reg, short value){
         break;
     //8-bit register
     case MicroCom::ah:
-        return (ax >> 8);
+        ax = ax & 0x00ff;
+        cValue <<= 8;
+        ax = ax | cValue;
+        break;
     case MicroCom::al:
-        return (ax & 0x00ff);
+        ax = ax & 0xff00;
+        ax = ax | cValue;
+        break;
     case MicroCom::bh:
-        return (bx >> 8);
+        bx = bx & 0x00ff;
+        cValue <<= 8;
+        bx = bx | cValue;
+        break;
     case MicroCom::bl:
-        return (bx & 0x00ff);
+        bx = bx & 0xff00;
+        bx = bx | cValue;
+        break;
     case MicroCom::ch:
-        return (cx >> 8);
+        cx = cx & 0x00ff;
+        cValue <<= 8;
+        cx = cx | cValue;
+        break;
     case MicroCom::cl:
-        return (cx & 0x00ff);
+        cx = cx & 0xff00;
+        cx = cx | cValue;
+        break;
     case MicroCom::dh:
-        return (dx >> 8);
+        dx = dx & 0x00ff;
+        cValue <<= 8;
+        dx = dx | cValue;
+        break;
     case MicroCom::dl:
-        return (dx & 0x00ff);
+        dx = dx & 0xff00;
+        dx = dx | cValue;
+        break;;
     default:
-        return 0;
+        break;
     }
 };
 
-
 /****************************************************
- - Function：set the register's value
- - Description：
+ - Function：set the register's value in a particular position
+ - Description：pos limit(16-bit:0-15 8-bit:0-7)
  - Calls：
  - Called By：
  - Input：[MicroCom::Regs]
  - Output：
  - Return：内部寄存器号为reg的寄存器的值(8或16位)
 *****************************************************/
-void setInnerReg(MicroCom::Regs reg, Voltage biValue, short pos);
-
-
-
-
+void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, short pos){
+    unsigned short flag = 0;
+    unsigned short temp = 1;
+    if(biValue==high){
+        flag = 1;
+    }
+    flag <<= pos;
+    temp <<= pos;
+    temp = ~temp;
+    switch(reg){
+    //16-bit register
+    case MicroCom::ax:
+        ax &= temp;
+        ax |= flag;
+        break;
+    case MicroCom::bx:
+        bx &= temp;
+        bx |= flag;
+        break;
+    case MicroCom::cx:
+        cx &= temp;
+        cx |= flag;
+        break;
+    case MicroCom::dx:
+        dx &= temp;
+        dx |= flag;
+        break;
+    case MicroCom::cs:
+        cs &= temp;
+        cs |= flag;
+        break;
+    case MicroCom::ds:
+        ds &= temp;
+        ds |= flag;
+        break;
+    case MicroCom::es:
+        es &= temp;
+        es |= flag;
+        break;
+    case MicroCom::ss:
+        ss &= temp;
+        ss |= flag;
+        break;
+    case MicroCom::bp:
+        bp &= temp;
+        bp |= flag;
+        break;
+    case MicroCom::sp:
+        sp &= temp;
+        sp |= flag;
+        break;
+    case MicroCom::si:
+        si &= temp;
+        si |= flag;
+        break;
+    case MicroCom::di:
+        di &= temp;
+        di |= flag;
+        break;
+    case MicroCom::ip:
+        ip &= temp;
+        ip |= flag;
+        break;
+    case MicroCom::flags:
+        flags &= temp;
+        flags |= flag;
+        break;
+    //8-bit register
+    case MicroCom::ah:
+        flag <<= 8;
+        temp = 1;
+        temp <<= (pos+8);
+        temp = ~temp;
+        ax &= temp;
+        ax |= flag;
+        break;
+    case MicroCom::al:
+        ax &= temp;
+        ax |= flag;
+        break;
+    case MicroCom::bh:
+        flag <<= 8;
+        temp = 1;
+        temp <<= (pos+8);
+        temp = ~temp;
+        bx &= temp;
+        bx |= flag;
+        break;
+    case MicroCom::bl:
+        bx &= temp;
+        bx |= flag;
+        break;
+    case MicroCom::ch:
+        flag <<= 8;
+        temp = 1;
+        temp <<= (pos+8);
+        temp = ~temp;
+        cx &= temp;
+        cx |= flag;
+        break;
+    case MicroCom::cl:
+        cx &= temp;
+        cx |= flag;
+        break;
+    case MicroCom::dh:
+        flag <<= 8;
+        temp = 1;
+        temp <<= (pos+8);
+        temp = ~temp;
+        dx &= temp;
+        dx |= flag;
+        break;
+    case MicroCom::dl:
+        dx &= temp;
+        dx |= flag;
+        break;
+    default:
+        break;
+    }
+}
 
 /****************************************************
  - Function：True Form to Complement Form
- - Description：The default length of regs is double byte
+ - Description：The default length of the regs is 16-bit
  - Calls：
  - Called By：
  - Input：[value(true form), MicroCom::RegsLen]
  - Output：
- - Return：value(complement form)[unsignde short]
+ - Return：value(complement form)[16-bit unsigned short]
 *****************************************************/
 unsigned short toCompForm(short value, MicroCom::RegsLen len = MicroCom::dbyte){
+    unsigned char temp = 0;
     //16-bit register
     if(len==MicroCom::dbyte){
-        if(value<0){
-            return static_cast<int>(value);
-        }
-        else {
-            return value;
-        }
+        return static_cast<unsigned short>(value);
     }
     //8-bit register
     else{
-        if(value<0){
-
-        }
+        temp = static_cast<unsigned char>(value);
     }
+    return static_cast<unsigned short>(temp);
 }
 
 
 /****************************************************
- - Function：Complement Form to True Form
- - Description：The default length of regs is double byte
+ - Function：complement form to unsigned true form
+ - Description：The default length of the regs is 16-bit
  - Calls：
  - Called By：
  - Input：[value(complement form), MicroCom::RegsLen]
  - Output：
- - Return：内部寄存器号为inReg的寄存器的值(8或16位)
+ - Return：a unsigned short number
 *****************************************************/
+unsigned short CPUs::toUnsignedTrueForm(unsigned short value, MicroCom::RegsLen len){
+    //8-bit
+    if(len==MicroCom::byte){
+        value &= 0x00ff;
+    }
+    return value;
+}
 
-
-
-//Complement Form to True Form 默认长度为16位
-short toTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
+/****************************************************
+ - Function：complement form to signed true form
+ - Description：The default length of the regs is 16-bit
+ - Calls：
+ - Called By：
+ - Input：[value(complement form), MicroCom::RegsLen]
+ - Output：
+ - Return：a signed short number
+*****************************************************/
+short CPUs::toSignedTrueForm(unsigned short value, MicroCom::RegsLen len){
+    unsigned char temp = 0;
+    short rst=0;
+    //16-bit
+    if(len==MicroCom::dbyte){
+        rst = static_cast<short>(value);
+    }
+    else{
+        value &= 0x00ff;
+        temp = static_cast<unsigned char>(value);
+        rst = static_cast<char>(temp);
+        rst = static_cast<short>(rst);
+    }
+    return rst;
+}

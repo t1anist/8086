@@ -42,24 +42,27 @@ private:
 
 public:
     //read Pins voltage
-    Voltage readVoltage(MicroCom::Pins pin);
+    Voltage getPinVoltage(MicroCom::Pins pin);
 
     //set Pins voltage
     bool setVoltage(MicroCom::Pins pin, Voltage pinVol);
 
-    //read Registers value
-    unsigned short readInnerReg(MicroCom::Regs reg);
-    Voltage readInnerReg(MicroCom::Regs reg, short pos);
+    //get the Register's value
+    unsigned short getRegValue(MicroCom::Regs reg);
 
-    //set Registers value
-    void setInnerReg(MicroCom::Regs reg, short value);
-    void setInnerReg(MicroCom::Regs reg, short biValue, short pos);
+    //get the Register's bit-value in a particular pos
+    Voltage getRegValue(MicroCom::Regs reg, short pos);
+
+    //set Register's value
+    void setRegValue(MicroCom::Regs reg, short value);
+    void setRegValue(MicroCom::Regs reg, Voltage biValue, short pos);
 
     //True Form(原码) to Complement Form(补码)
     unsigned short toCompForm(short value, MicroCom::RegsLen len = MicroCom::dbyte);
 
     //Complement Form to True Form 默认长度为16位
-    short toTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
+    unsigned short toUnsignedTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
+    short toSignedTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
 };
 
 #endif // CPUS_H

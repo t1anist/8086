@@ -13,7 +13,7 @@ private:
 public:
     explicit Hardwares(QWidget *parent = nullptr);
     virtual bool setVoltage(MicroCom::Pins pin, Voltage pinVol)=0;
-
+    void setValueByPos(unsigned short &value, short pos, MicroCom::Regs reg, Voltage biValue);
 signals:
 
 public slots:

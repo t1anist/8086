@@ -58,16 +58,16 @@ enum Regs{
     di=12,
     ip=13,
     flags=14,
-    ah=15,
-    al=16,
-    bh=17,
-    bl=18,
-    ch=19,
-    cl=20,
-    dh=21,
-    dl=22,
-    io=23,   //8255A
-    ct=24   //counter 8253/8254
+    al=15,
+    bl=16,
+    cl=17,
+    dl=18,
+    io=19,   //8255A
+    ct=20,  //counter 8253/8254
+    ah=30,
+    bh=31,
+    ch=32,
+    dh=33
 };
 
 enum RegsLen{

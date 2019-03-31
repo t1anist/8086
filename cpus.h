@@ -41,25 +41,24 @@ private:
     Voltage CLK;
 
 public:
-    //read Pins voltage
+    //get the pointer to the pin
+    Voltage* selectPin(MicroCom::Pins pin);
+    //read the pin's voltage
     Voltage getPinVoltage(MicroCom::Pins pin);
-
-    //set Pins voltage
+    //set the pin's voltage
     bool setVoltage(MicroCom::Pins pin, Voltage pinVol);
 
+    //get the pointer to the register
+    unsigned short* selectRegister(MicroCom::Regs reg);
     //get the Register's value
     unsigned short getRegValue(MicroCom::Regs reg);
-
-    //get the Register's bit-value in a particular pos
     Voltage getRegValue(MicroCom::Regs reg, short pos);
-
-    //set Register's value
+    //set the Register's value
     void setRegValue(MicroCom::Regs reg, short value);
     void setRegValue(MicroCom::Regs reg, Voltage biValue, short pos);
 
     //True Form(原码) to Complement Form(补码)
     unsigned short toCompForm(short value, MicroCom::RegsLen len = MicroCom::dbyte);
-
     //Complement Form to True Form 默认长度为16位
     unsigned short toUnsignedTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
     short toSignedTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);

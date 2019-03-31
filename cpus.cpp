@@ -3,16 +3,20 @@
 
 CPUs::CPUs()
 {
-
+    int a =1;
+    qDebug()<<"a="<<a;
+    connect(this,&CPUs::pip,this,&CPUs::resetCPU);
+    //信号和槽的参数必须一致，否则编译不通过
+    qDebug()<<"after connect";
 }
 
 /****************************************************
  - Function: select the pin of 8086 CPU
  - Calls：
  - Called By：
-        + setVoltage(MicroCom::Pins,Voltage);
-        + getPinVoltage(MicroCom::pins);
- - Input：[MicroCom::Pins pin]、[Voltage pinVol(引脚电平)]
+        + bool setVoltage(MicroCom::Pins,Voltage);
+        + Voltage getPinVoltage(MicroCom::pins);
+ - Input：[MicroCom::Pins]
  - Output：
  - Return：the pointer to the pin
 *****************************************************/
@@ -87,9 +91,10 @@ Voltage* CPUs::selectPin(MicroCom::Pins pin){
 
 /****************************************************
  - Function: set the pin's voltage of 8086 CPU
- - Calls：selectPin(MicroCom::Pins pin)
+ - Calls：
+        + unsigned short* selectPin(MicroCom::Pins pin)
  - Called By：
- - Input：[MicroCom::Pins pin]、[Voltage pinVol(引脚电平)]
+ - Input：[MicroCom::Pins]、[Voltage pinVol(引脚电平)]
  - Output：
  - Return：if succeed, return true; else return false
 *****************************************************/
@@ -126,16 +131,23 @@ Voltage CPUs::getPinVoltage(MicroCom::Pins pin){
  - Output：
  - Return：the pointer to the register
 *****************************************************/
-unsigned short* CPUs::selectRegister(MicroCom::Regs reg){
+unsigned short* CPUs::selectReg(MicroCom::Regs reg){
     switch(reg){
-    //16-bit register
     case MicroCom::ax:
+    case MicroCom::ah:
+    case MicroCom::al:
         return &ax;
     case MicroCom::bx:
+    case MicroCom::bh:
+    case MicroCom::bl:
         return &bx;
     case MicroCom::cx:
+    case MicroCom::ch:
+    case MicroCom::cl:
         return &cx;
     case MicroCom::dx:
+    case MicroCom::dh:
+    case MicroCom::dl:
         return &dx;
     case MicroCom::cs:
         return &cs;
@@ -157,23 +169,6 @@ unsigned short* CPUs::selectRegister(MicroCom::Regs reg){
         return &ip;
     case MicroCom::flags:
         return &flags;
-    //8-bit register
-    case MicroCom::ah:
-        return &ax;
-    case MicroCom::al:
-        return &ax;
-    case MicroCom::bh:
-        return &bx;
-    case MicroCom::bl:
-        return &bx;
-    case MicroCom::ch:
-        return &cx;
-    case MicroCom::cl:
-        return &cx;
-    case MicroCom::dh:
-        return &dx;
-    case MicroCom::dl:
-        return &dx;
     default:
         return nullptr;
     }
@@ -182,13 +177,14 @@ unsigned short* CPUs::selectRegister(MicroCom::Regs reg){
 /****************************************************
  - Function：get the register's value
  - Calls：
- - Called By：getRegValue(MicroCom::Regs reg,short pos)
- - Input：[MicroCom::Reg]
+ - Called By：
+        + getRegValue(MicroCom::Regs reg,short pos)
+ - Input：[MicroCom::Regs]
  - Output：
- - Return：内部寄存器号为reg的寄存器的值(8或16位)
+ - Return：16-bit value of the reg
 *****************************************************/
 unsigned short CPUs::getRegValue(MicroCom::Regs reg){
-    unsigned short* rst = selectRegister(reg);
+    unsigned short* rst = selectReg(reg);
     if( reg >= MicroCom::ax && reg < MicroCom::al ){
         return *rst;
     }
@@ -202,15 +198,15 @@ unsigned short CPUs::getRegValue(MicroCom::Regs reg){
     }
 }
 
-
 /****************************************************
  - Function：get the register's value in a particular position
  - Description：pos limit(16-bit:0-15 8-bit:0-7)
- - Calls：getRegValue(MicroCom::Regs reg)
+ - Calls：
+        + Voltage getRegValue(MicroCom::Regs reg)
  - Called By：
  - Input：[MicroCom::Regs]
  - Output：register value with complement form
- - Return：内部寄存器号为reg的寄存器的值(8或16位)
+ - Return：Voltage value of the reg's selected pos
 *****************************************************/
 Voltage CPUs::getRegValue(MicroCom::Regs reg, short pos){
     unsigned short flag = 1;
@@ -226,16 +222,16 @@ Voltage CPUs::getRegValue(MicroCom::Regs reg, short pos){
 
 /****************************************************
  - Function：set the register's value
- - Description：
+ - Description：the value is a signed number
  - Calls：
  - Called By：
  - Input：[MicroCom::Regs]
  - Output：
- - Return：内部寄存器号为reg的寄存器的值(8或16位)
+ - Return：
 *****************************************************/
 void CPUs::setRegValue(MicroCom::Regs reg, short value){
     unsigned short cValue = 0;
-    unsigned short* rst = selectRegister(reg);
+    unsigned short* rst = selectReg(reg);
     if(reg>0 && reg<15){
         cValue = toCompForm(value);
     }
@@ -255,7 +251,33 @@ void CPUs::setRegValue(MicroCom::Regs reg, short value){
         }
         *rst |= cValue;
     }
-};
+}
+
+/****************************************************
+ - Function：set the register's value
+ - Description：the value is a unsigned number
+ - Calls：
+ - Called By：
+ - Input：[MicroCom::Regs]
+ - Output：
+ - Return：
+*****************************************************/
+void CPUs::setRegUnsignedValue(MicroCom::Regs reg, unsigned short value){
+    unsigned short* rst = selectReg(reg);
+    if( reg >= MicroCom::ax && reg < MicroCom::al ){
+        *rst = value;
+    }
+    else{
+        if(reg >=MicroCom::al && reg<=MicroCom::dl){
+            *rst &= 0xff00;
+        }
+        else{
+            *rst &= 0x00ff;
+            value <<= 8;
+        }
+        *rst |= value;
+    }
+}
 
 /****************************************************
  - Function：set the register's value in a particular position
@@ -265,10 +287,10 @@ void CPUs::setRegValue(MicroCom::Regs reg, short value){
  - Called By：
  - Input：[MicroCom::Regs]
  - Output：
- - Return：内部寄存器号为reg的寄存器的值(8或16位)
+ - Return：
 *****************************************************/
 void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, short pos){
-    unsigned short* rst = selectRegister(reg);
+    unsigned short* rst = selectReg(reg);
     setValueByPos(*rst,pos,reg,biValue);
 }
 
@@ -302,7 +324,7 @@ unsigned short CPUs::toCompForm(short value, MicroCom::RegsLen len){
  - Called By：
  - Input：[value(complement form), MicroCom::RegsLen]
  - Output：
- - Return：a unsigned short number
+ - Return：a unsigned short number in true form
 *****************************************************/
 unsigned short CPUs::toUnsignedTrueForm(unsigned short value, MicroCom::RegsLen len){
     //8-bit
@@ -319,7 +341,7 @@ unsigned short CPUs::toUnsignedTrueForm(unsigned short value, MicroCom::RegsLen 
  - Called By：
  - Input：[value(complement form), MicroCom::RegsLen]
  - Output：
- - Return：a signed short number
+ - Return：a signed short number in true form
 *****************************************************/
 short CPUs::toSignedTrueForm(unsigned short value, MicroCom::RegsLen len){
     unsigned char temp = 0;
@@ -337,4 +359,33 @@ short CPUs::toSignedTrueForm(unsigned short value, MicroCom::RegsLen len){
     return rst;
 }
 
+void CPUs::emitReset(){
+    emit pip();
+}
 
+//8086CPU的复位函数
+//高电平后呈高阻怎么表示
+void CPUs::resetCPU(){
+    //set registers' value
+    flags=0;
+    cs=0xffff;
+    ip=0;
+    ds=0;
+    es=0;
+    ss=0;
+    //set pins' voltage
+    for(int i=0;i<16;i++){
+        AD[i]=himped;
+    }
+    for(int i=0;i<4;i++){
+        AS[i]=himped;
+    }
+    ALE = low;
+    //inta 高电平后呈高阻
+    //rd 高电平后呈高阻
+    //wr 高电平后呈高阻
+    //Mio 高电平后呈高阻
+    //DTr 高电平后呈高阻
+    //den 高电平后呈高阻
+    return;
+}

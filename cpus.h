@@ -9,6 +9,7 @@ class CPUs : public Hardwares
 public:
     CPUs();
 private:
+    Q_OBJECT
     unsigned short ax;
     unsigned short bx;
     unsigned short cx;
@@ -49,19 +50,28 @@ public:
     bool setVoltage(MicroCom::Pins pin, Voltage pinVol);
 
     //get the pointer to the register
-    unsigned short* selectRegister(MicroCom::Regs reg);
+    unsigned short* selectReg(MicroCom::Regs reg);
     //get the Register's value
     unsigned short getRegValue(MicroCom::Regs reg);
     Voltage getRegValue(MicroCom::Regs reg, short pos);
     //set the Register's value
     void setRegValue(MicroCom::Regs reg, short value);
     void setRegValue(MicroCom::Regs reg, Voltage biValue, short pos);
+    void setRegUnsignedValue(MicroCom::Regs reg, unsigned short value);
 
     //True Form(原码) to Complement Form(补码)
     unsigned short toCompForm(short value, MicroCom::RegsLen len = MicroCom::dbyte);
     //Complement Form to True Form 默认长度为16位
     unsigned short toUnsignedTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
     short toSignedTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
+    void emitReset();//在每个类中添加一个触发器函数，用于发射信号。然后将所有的connect写入构造函数内！
+
+signals:
+    void pip();
+
+public slots:
+    //reset
+    void resetCPU();
 };
 
 #endif // CPUS_H

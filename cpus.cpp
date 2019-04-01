@@ -294,7 +294,6 @@ void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, short pos){
     setValueByPos(*rst,pos,reg,biValue);
 }
 
-
 /****************************************************
  - Function：True Form to Complement Form
  - Description：The default length of the regs is 16-bit
@@ -318,23 +317,6 @@ unsigned short CPUs::toCompForm(short value, MicroCom::RegsLen len){
 }
 
 /****************************************************
- - Function：complement form to unsigned true form
- - Description：The default length of the regs is 16-bit
- - Calls：
- - Called By：
- - Input：[value(complement form), MicroCom::RegsLen]
- - Output：
- - Return：a unsigned short number in true form
-*****************************************************/
-unsigned short CPUs::toUnsignedTrueForm(unsigned short value, MicroCom::RegsLen len){
-    //8-bit
-    if(len==MicroCom::byte){
-        value &= 0x00ff;
-    }
-    return value;
-}
-
-/****************************************************
  - Function：complement form to signed true form
  - Description：The default length of the regs is 16-bit
  - Calls：
@@ -343,7 +325,7 @@ unsigned short CPUs::toUnsignedTrueForm(unsigned short value, MicroCom::RegsLen 
  - Output：
  - Return：a signed short number in true form
 *****************************************************/
-short CPUs::toSignedTrueForm(unsigned short value, MicroCom::RegsLen len){
+short CPUs::toTrueForm(unsigned short value, MicroCom::RegsLen len){
     unsigned char temp = 0;
     short rst=0;
     //16-bit

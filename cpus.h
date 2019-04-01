@@ -62,8 +62,7 @@ public:
     //True Form(原码) to Complement Form(补码)
     unsigned short toCompForm(short value, MicroCom::RegsLen len = MicroCom::dbyte);
     //Complement Form to True Form 默认长度为16位
-    unsigned short toUnsignedTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
-    short toSignedTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
+    short toTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
     void emitReset();//在每个类中添加一个触发器函数，用于发射信号。然后将所有的connect写入构造函数内！
 
 signals:

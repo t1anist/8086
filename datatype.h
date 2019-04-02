@@ -52,28 +52,29 @@ enum Regs{
     ds=6,
     es=7,
     ss=8,
-    bp=9,
-    sp=10,
-    si=11,
-    di=12,
-    ip=13,
-    flags=14,
-    al=15,
-    bl=16,
-    cl=17,
-    dl=18,
-    io=19,   //8255A
-    ct=20,  //counter 8253/8254
-    ah=30,
-    bh=31,
-    ch=32,
-    dh=33
+    ip=9,
+    flags=10,
+    bp=11,
+    sp=12,
+    si=13,
+    di=14,
+    io=15,   //8255A
+    ct=16,  //counter 8253/8254
+    al=17,
+    bl=18,
+    cl=19,
+    dl=20,
+    ah=21,
+    bh=22,
+    ch=23,
+    dh=24
 };
 
 enum RegsLen{
     dbyte=16,
     byte=8
 };
+
 }
 
 //引脚电平

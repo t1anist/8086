@@ -59,10 +59,7 @@ public:
     void setRegValue(MicroCom::Regs reg, Voltage biValue, short pos);
     void setRegUnsignedValue(MicroCom::Regs reg, unsigned short value);
 
-    //True Form(原码) to Complement Form(补码)
-    unsigned short toCompForm(short value, MicroCom::RegsLen len = MicroCom::dbyte);
-    //Complement Form to True Form 默认长度为16位
-    short toTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
+
     void emitReset();//在每个类中添加一个触发器函数，用于发射信号。然后将所有的connect写入构造函数内！
 
 signals:

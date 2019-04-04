@@ -72,3 +72,31 @@ short Hardwares::toTrueForm(unsigned short value, MicroCom::RegsLen len){
     }
     return rst;
 }
+
+void Hardwares::toBinary(int denary, short binary[]){
+    int j=0;
+    while(denary)
+    {
+        binary[j]=denary%2;
+        denary/=2;
+        j++;
+    }
+    if(j<ADDRNUM){
+        for(int i=j;i<ADDRNUM;i++){
+            binary[i]=0;
+        }
+    }
+    return;
+}
+
+unsigned short Hardwares::toDenary(short binary[]){
+    unsigned short rst = 0;
+    for(int i=0;i<DATANUM;i++){
+        if(binary[i]==1){
+            rst += 2^i;
+        }
+    }
+    return rst;
+}
+
+

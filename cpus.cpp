@@ -1,5 +1,5 @@
 #include "cpus.h"
-#include <QDebug>
+
 
 CPUs::CPUs()
 {
@@ -198,6 +198,15 @@ unsigned short CPUs::getRegValue(MicroCom::Regs reg){
     }
 }
 
+unsigned short CPUs::getDataValue(MicroCom::RegsLen len){
+    short value[DATANUM] ={0};
+    int numlen = static_cast<int>(len);
+    for(int i=0;i<numlen;i++){
+        (AD[i]==low)?value[i]=0:value[i]=1;
+    }
+    return toDenary(value);
+}
+
 /****************************************************
  - Function：get the register's value in a particular position
  - Description：pos limit(16-bit:0-15 8-bit:0-7)
@@ -293,6 +302,104 @@ void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, short pos){
     unsigned short* rst = selectReg(reg);
     setValueByPos(*rst,pos,reg,biValue);
 }
+
+/****************************************************
+ - Function：set the AD and AS pins' voltage
+ - Description：
+ - Calls：
+ - Called By：
+ - Input：address
+ - Output：
+ - Return：
+*****************************************************/
+void CPUs::setAddrPinsVoltage(int addr){
+    short binary[ADDRNUM] = {0};
+    toBinary(addr,binary);
+    for(int i=0;i<DATANUM;i++){
+        if(binary[i]==1){
+            AD[i]=high;
+        }
+        else{
+            AD[i]=low;
+        }
+    }
+    for(int i=0;i<4;i++){
+        if(binary[i+DATANUM]==1){
+            AS[i]=high;
+        }
+        else{
+            AS[i]=low;
+        }
+    }
+}
+
+void CPUs::T1(){
+
+    //【Mio】在整个总线周期中均有效，由于进行存储器操作，故Mio高电平
+    Mio = high;
+    //【bhe】T1期间有效，高电平表示数据线的高8位无效，低电平表示有效
+    bhe = low;
+    //【AD1~AD16】【AS17~AS20】T1期间输出地址
+    setAddrPinsVoltage(address);
+    //【ALE】在T1期间，地址锁存有效信号，是一个正脉冲，其余时间均为低电平
+    ALE = high;
+        //延时半周期后
+    ALE = low;
+    //【DTr】在T1~T4内保持低电平，T4周期一半时变高电平
+    DTr = low;
+    //【den】初始为高电平
+    den = high;
+    qDebug()<<"this is T1";
+}
+
+void CPUs::T2(){
+    /** T2 **/
+    //【AS17~AS20】T2~T4期间输出的是状态线S6~S3
+
+    //【bhe】在T2~T4期间均为高电平
+    bhe = high;
+    //【AD1~AD16】T2开始时变为高阻
+    for(int i=1;i<16;i++){
+        AD[i]=himped;
+    }
+    //【rd】在T2开始时变成低电平
+    rd = low;
+    //【den】在T2~T4输出期间低电平，表示数据有效，用来实现数据的选通
+    den = low;
+    qDebug()<<"this is T2";
+}
+
+void CPUs::T3(){
+    /** T3 **/
+    //【AD1~AD16】在T3开始时接受数据
+    data = getDataValue();
+    //【rd】在T3结束时变高电平
+    rd = high;
+    qDebug()<<"this is T3";
+}
+
+void CPUs::T4(){
+    /** T4 **/
+    //【den】在T4开始时变高
+    den = high;
+    //【AD1~AD16】在T4开始时变为高阻态
+    for(int i=1;i<16;i++){
+        AD[i] = himped;
+    }
+    qDebug()<<"this is T4";
+}
+
+unsigned short CPUs::readBusCycle(int phyAddr){
+    address = phyAddr;
+    //QTimer *timer1 = new QTimer(this);
+    QTimer::singleShot(1000,this,&CPUs::T1);
+    QTimer::singleShot(2000,this,&CPUs::T2);
+    QTimer::singleShot(3000,this,&CPUs::T3);
+    QTimer::singleShot(4000,this,&CPUs::T4);
+    return data;
+}
+
+
 
 
 void CPUs::emitReset(){

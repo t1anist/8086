@@ -1,6 +1,9 @@
 #ifndef DATATYPE_H
 #define DATATYPE_H
 
+#define ADDRNUM 20
+#define DATANUM 16
+
 namespace MicroCom{
 //引脚号
 enum Pins{
@@ -73,6 +76,11 @@ enum Regs{
 enum RegsLen{
     dbyte=16,
     byte=8
+};
+
+enum Mode{
+    write,
+    read
 };
 
 }

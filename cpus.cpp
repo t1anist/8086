@@ -1,13 +1,11 @@
 #include "cpus.h"
 
-
 CPUs::CPUs()
 {
-    int a =1;
-    qDebug()<<"a="<<a;
-    connect(this,&CPUs::pip,this,&CPUs::resetCPU);
-    //信号和槽的参数必须一致，否则编译不通过
-    qDebug()<<"after connect";
+
+    //一旦8086CPU的引脚值发生改变，就调用handleInnerVolChange槽函数执行相关操作
+    connect(this,&CPUs::pinVolChanged,this,&CPUs::handleInnerVolChange);
+
 }
 
 /****************************************************
@@ -89,35 +87,7 @@ Voltage* CPUs::selectPin(MicroCom::Pins pin){
     }
 }
 
-/****************************************************
- - Function: set the pin's voltage of 8086 CPU
- - Calls：
-        + unsigned short* selectPin(MicroCom::Pins pin)
- - Called By：
- - Input：[MicroCom::Pins]、[Voltage pinVol(引脚电平)]
- - Output：
- - Return：if succeed, return true; else return false
-*****************************************************/
-bool CPUs::setVoltage(MicroCom::Pins pin, Voltage pinVol){
-    if(pinVol!=high && pinVol!=low){
-        return false;
-    }
-    Voltage* p = selectPin(pin);
-    *p = pinVol;
-    return true;
-}
 
-/****************************************************
- - Function：get the pin's voltage of 8086 CPU
- - Calls：selectPin(MicroCom::Pins pin)
- - Called By：
- - Input：[MicroCom::Pins pin]
- - Output：
- - Return：pin's voltage(high or low)
-*****************************************************/
-Voltage CPUs::getPinVoltage(MicroCom::Pins pin){
-    return *selectPin(pin);
-}
 
 /****************************************************
  - Function: select the register of 8086 CPU
@@ -305,7 +275,7 @@ void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, short pos){
 
 /****************************************************
  - Function：set the AD and AS pins' voltage
- - Description：
+ - Description：是不是应该考虑给地址单独搞一个信号？
  - Calls：
  - Called By：
  - Input：address
@@ -334,11 +304,11 @@ void CPUs::setAddrPinsVoltage(int addr){
 }
 
 void CPUs::T1(){
-
     //【Mio】在整个总线周期中均有效，由于进行存储器操作，故Mio高电平
+    setVoltage(MicroCom::Mio, high);
     Mio = high;
     //【bhe】T1期间有效，高电平表示数据线的高8位无效，低电平表示有效
-    bhe = low;
+    setVoltage(MicroCom::bhe, low);
     //【AD1~AD16】【AS17~AS20】T1期间输出地址
     setAddrPinsVoltage(address);
     //【ALE】在T1期间，地址锁存有效信号，是一个正脉冲，其余时间均为低电平
@@ -353,62 +323,65 @@ void CPUs::T1(){
 }
 
 void CPUs::T2(){
-    /** T2 **/
-    //【AS17~AS20】T2~T4期间输出的是状态线S6~S3
-
     //【bhe】在T2~T4期间均为高电平
-    bhe = high;
+    setVoltage(MicroCom::bhe,high);
     //【AD1~AD16】T2开始时变为高阻
     for(int i=1;i<16;i++){
         AD[i]=himped;
     }
     //【rd】在T2开始时变成低电平
-    rd = low;
+    setVoltage(MicroCom::rd,low);
     //【den】在T2~T4输出期间低电平，表示数据有效，用来实现数据的选通
-    den = low;
+    setVoltage(MicroCom::den,low);
     qDebug()<<"this is T2";
 }
 
 void CPUs::T3(){
-    /** T3 **/
     //【AD1~AD16】在T3开始时接受数据
     data = getDataValue();
-    //【rd】在T3结束时变高电平
-    rd = high;
     qDebug()<<"this is T3";
 }
 
 void CPUs::T4(){
-    /** T4 **/
+    //【rd】在T3结束时变高电平
+    setVoltage(MicroCom::rd,high);
     //【den】在T4开始时变高
-    den = high;
+    setVoltage(MicroCom::den,high);
     //【AD1~AD16】在T4开始时变为高阻态
     for(int i=1;i<16;i++){
-        AD[i] = himped;
+        AD[i]=himped;
     }
     qDebug()<<"this is T4";
 }
 
 unsigned short CPUs::readBusCycle(int phyAddr){
     address = phyAddr;
-    //QTimer *timer1 = new QTimer(this);
-    QTimer::singleShot(1000,this,&CPUs::T1);
-    QTimer::singleShot(2000,this,&CPUs::T2);
-    QTimer::singleShot(3000,this,&CPUs::T3);
-    QTimer::singleShot(4000,this,&CPUs::T4);
+    /** 总线操作 **/
+    //QTimer::singleShot(1*SEC,this,&CPUs::T1);
+    //QTimer::singleShot(2*SEC,this,&CPUs::T2);
+    //QTimer::singleShot(3*SEC,this,&CPUs::T3);
+    //QTimer::singleShot(4*SEC,this,&CPUs::T4);
     return data;
 }
 
+void CPUs::writeBusCycle(int phyAddr, unsigned short value){
+    address = phyAddr;
+    /** 写总线周期 **/
+    //QTimer::singleShot(1*SEC,this,&CPUs::T1);
+    //QTimer::singleShot(2*SEC,this,&CPUs::T2);
+    //QTimer::singleShot(3*SEC,this,&CPUs::T3);
+    //QTimer::singleShot(4*SEC,this,&CPUs::T4);
+    /** 将数据写入存储单元 **/
 
-
-
-void CPUs::emitReset(){
-    emit pip();
+    return;
 }
+
+
 
 //8086CPU的复位函数
 //高电平后呈高阻怎么表示
 void CPUs::resetCPU(){
+    qDebug()<<"now start to reset";
     //set registers' value
     flags=0;
     cs=0xffff;
@@ -423,7 +396,7 @@ void CPUs::resetCPU(){
     for(int i=0;i<4;i++){
         AS[i]=himped;
     }
-    ALE = low;
+    setVoltage(MicroCom::ALE,low);
     //inta 高电平后呈高阻
     //rd 高电平后呈高阻
     //wr 高电平后呈高阻
@@ -432,3 +405,39 @@ void CPUs::resetCPU(){
     //den 高电平后呈高阻
     return;
 }
+
+
+/****************************************************
+ - Function：对上游原件的引脚电平变化做出反应
+ - Description：
+ - Calls：
+ - Called By：
+ - Input：address
+ - Output：
+ - Return：
+*****************************************************/
+void CPUs::handleOuterVolChange(MicroCom::Pins pinT, Voltage senderVol){
+    setVoltage(pinT,senderVol);
+}
+
+/****************************************************
+ - Function：set the AD and AS pins' voltage
+ - Description：
+ - Calls：
+ - Called By：
+ - Input：address
+ - Output：
+ - Return：
+*****************************************************/
+void CPUs::handleInnerVolChange(MicroCom::Pins pin){
+    switch(pin){
+    case MicroCom::RESET:
+        if(getPinVoltage(pin)==high){
+            resetCPU();
+        }
+        break;
+    default:
+        break;
+    }
+}
+

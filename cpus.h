@@ -45,14 +45,9 @@ private:
     int address;
     unsigned short data;
 
-
 public:
     //get the pointer to the pin
     Voltage* selectPin(MicroCom::Pins pin);
-    //read the pin's voltage
-    Voltage getPinVoltage(MicroCom::Pins pin);
-    //set the pin's voltage
-    bool setVoltage(MicroCom::Pins pin, Voltage pinVol);
     void setAddrPinsVoltage(int addr);
 
     //get the pointer to the register
@@ -71,12 +66,15 @@ public:
     //写总线周期
     void writeBusCycle(int phyAddr, unsigned short value);
 
-    void emitReset();//在每个类中添加一个触发器函数，用于发射信号。然后将所有的connect写入构造函数内！
+    //对上游原件的引脚电平变化做出反应的函数
+    void handleOuterVolChange(MicroCom::Pins pinT, Voltage senderVol);
+
 
 signals:
-    void pip();
 
 public slots:
+    //对本原件引脚电平变化做出反应的函数
+    void handleInnerVolChange(MicroCom::Pins pin);
     //reset
     void resetCPU();
     void T1();
@@ -84,8 +82,6 @@ public slots:
     void T3();
     void T4();
 
-protected:
-    void timeEvent(QTimerEvent *e);
 
 };
 

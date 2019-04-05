@@ -1,10 +1,48 @@
 #include "hardwares.h"
+#include "cpus.h"
 
 Hardwares::Hardwares(QWidget *parent) : QWidget(parent)
 {
 
 }
 
+/****************************************************
+ - Function: set the pin's voltage of 8086 CPU
+ - Calls：
+        + unsigned short* selectPin(MicroCom::Pins pin)
+ - Called By：
+ - Input：[MicroCom::Pins]、[Voltage pinVol(引脚电平)]
+ - Output：
+ - Return：if succeed, return true; else return false
+*****************************************************/
+bool Hardwares::setVoltage(MicroCom::Pins pin, Voltage pinVol){
+    Voltage* p = selectPin(pin);
+    *p = pinVol;
+    emit pinVolChanged(pin);
+    return true;
+}
+
+/****************************************************
+ - Function：get the pin's voltage of 8086 CPU
+ - Calls：selectPin(MicroCom::Pins pin)
+ - Called By：
+ - Input：[MicroCom::Pins pin]
+ - Output：
+ - Return：pin's voltage(high or low)
+*****************************************************/
+Voltage Hardwares::getPinVoltage(MicroCom::Pins pin){
+    return *selectPin(pin);
+}
+
+
+/****************************************************
+ - Function：改变8或16位寄存器某一位的值
+ - Calls：
+ - Called By：
+ - Input：
+ - Output：
+ - Return：
+*****************************************************/
 void Hardwares::setValueByPos(unsigned short &value, short pos, MicroCom::Regs reg, Voltage biValue){
     unsigned short flag = 0;
     unsigned short temp = 1;
@@ -73,6 +111,15 @@ short Hardwares::toTrueForm(unsigned short value, MicroCom::RegsLen len){
     return rst;
 }
 
+/****************************************************
+ - Function：complement form to signed true form
+ - Description：The default length of the regs is 16-bit
+ - Calls：
+ - Called By：
+ - Input：[value(complement form), MicroCom::RegsLen]
+ - Output：
+ - Return：a signed short number in true form
+*****************************************************/
 void Hardwares::toBinary(int denary, short binary[]){
     int j=0;
     while(denary)
@@ -89,6 +136,15 @@ void Hardwares::toBinary(int denary, short binary[]){
     return;
 }
 
+/****************************************************
+ - Function：complement form to signed true form
+ - Description：The default length of the regs is 16-bit
+ - Calls：
+ - Called By：
+ - Input：[value(complement form), MicroCom::RegsLen]
+ - Output：
+ - Return：a signed short number in true form
+*****************************************************/
 unsigned short Hardwares::toDenary(short binary[]){
     unsigned short rst = 0;
     for(int i=0;i<DATANUM;i++){
@@ -98,5 +154,4 @@ unsigned short Hardwares::toDenary(short binary[]){
     }
     return rst;
 }
-
 

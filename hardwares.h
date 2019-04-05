@@ -12,7 +12,13 @@ private:
     Voltage gnd;
 public:
     explicit Hardwares(QWidget *parent = nullptr);
-    virtual bool setVoltage(MicroCom::Pins pin, Voltage pinVol)=0;
+
+    virtual Voltage* selectPin(MicroCom::Pins pin)=0;
+    virtual void handleOuterVolChange(MicroCom::Pins pinT, Voltage senderVol)=0;
+
+    bool setVoltage(MicroCom::Pins pin, Voltage pinVol);
+    Voltage getPinVoltage(MicroCom::Pins pin);
+
     void setValueByPos(unsigned short &value, short pos, MicroCom::Regs reg, Voltage biValue);
 
     //True Form(原码) to Complement Form(补码)
@@ -22,8 +28,8 @@ public:
     void toBinary(int denary, short binary[]);
     unsigned short toDenary(short binary[]);
 
-
 signals:
+    void pinVolChanged(MicroCom::Pins);
 
 public slots:
 };

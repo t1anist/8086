@@ -4,7 +4,6 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    static int sec = 0;
     //在MainWindow上面写软件
     MainWindow w;
     w.show();

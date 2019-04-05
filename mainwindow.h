@@ -24,10 +24,12 @@ public:
     void mov(CPUs *cp, MicroCom::Regs regD, MicroCom::Regs regS);
     unsigned short regIndiAddressing(CPUs *cp, MicroCom::Regs reg);
     void regIndiAddressing(CPUs *cp, MicroCom::Regs reg, unsigned short value);
+    //连线函数，将两个引脚连接起来
+    void link(Hardwares *sender, Voltage volS, Hardwares *target, MicroCom::Pins pinT);
 
 private:
     Ui::MainWindow *ui;
-    CPUs *cp;
+    CPUs* cp1;
 };
 
 #endif // MAINWINDOW_H

@@ -3,6 +3,7 @@
 
 #define ADDRNUM 20
 #define DATANUM 16
+#define SEC 1000
 
 namespace MicroCom{
 //引脚号

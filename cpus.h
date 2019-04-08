@@ -11,6 +11,8 @@ public:
     CPUs();
 private:
     Q_OBJECT
+    unsigned short innerReg[14];
+    Voltage pins[34];
     unsigned short ax;
     unsigned short bx;
     unsigned short cx;

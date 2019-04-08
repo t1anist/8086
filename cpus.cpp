@@ -18,6 +18,7 @@ CPUs::CPUs()
  - Output：
  - Return：the pointer to the pin
 *****************************************************/
+/*
 Voltage* CPUs::selectPin(MicroCom::Pins pin){
     switch(pin){
     case MicroCom::AD1:
@@ -85,6 +86,10 @@ Voltage* CPUs::selectPin(MicroCom::Pins pin){
     default:
         return nullptr;
     }
+}*/
+
+Voltage* CPUs::selectPin(MicroCom::Pins pin){
+    return &pins[pin];
 }
 
 
@@ -102,6 +107,7 @@ Voltage* CPUs::selectPin(MicroCom::Pins pin){
  - Return：the pointer to the register
 *****************************************************/
 unsigned short* CPUs::selectReg(MicroCom::Regs reg){
+
     switch(reg){
     case MicroCom::ax:
     case MicroCom::ah:
@@ -153,6 +159,7 @@ unsigned short* CPUs::selectReg(MicroCom::Regs reg){
  - Output：
  - Return：16-bit value of the reg
 *****************************************************/
+/*
 unsigned short CPUs::getRegValue(MicroCom::Regs reg){
     unsigned short* rst = selectReg(reg);
     if( reg >= MicroCom::ax && reg < MicroCom::al ){
@@ -164,6 +171,22 @@ unsigned short CPUs::getRegValue(MicroCom::Regs reg){
         }
         else{
             return (*rst >> 8);
+        }
+    }
+}*/
+unsigned short CPUs::getRegValue(MicroCom::Regs reg){
+
+   // unsigned short* rst = selectReg(reg);
+    if( reg >= MicroCom::ax && reg < MicroCom::al ){
+        return innerReg[reg];
+       // return *rst;
+    }
+    else{
+        if(reg >=MicroCom::al && reg<=MicroCom::dl){
+            return (innerReg[reg] & 0x00ff);
+        }
+        else{
+            return (innerReg[reg] >> 8);
         }
     }
 }
@@ -208,6 +231,7 @@ Voltage CPUs::getRegValue(MicroCom::Regs reg, short pos){
  - Output：
  - Return：
 *****************************************************/
+/*
 void CPUs::setRegValue(MicroCom::Regs reg, short value){
     unsigned short cValue = 0;
     unsigned short* rst = selectReg(reg);
@@ -230,6 +254,24 @@ void CPUs::setRegValue(MicroCom::Regs reg, short value){
         }
         *rst |= cValue;
     }
+}*/
+
+void CPUs::setRegValue(MicroCom::Regs reg, short value){
+    unsigned short cValue = 0;
+    if(reg>=MicroCom::ax && reg<=MicroCom::di){
+        innerReg[reg] = toCompForm(value);
+    }
+    else{
+        cValue = toCompForm(value,MicroCom::byte);
+        if( reg>=MicroCom::al && reg<=MicroCom::dl){
+            innerReg[reg] &= 0xff00;
+        }
+        else{
+            innerReg[reg] &= 0x00ff;
+            cValue <<= 8;
+        }
+        innerReg[reg] |= cValue;
+    }
 }
 
 /****************************************************
@@ -241,6 +283,24 @@ void CPUs::setRegValue(MicroCom::Regs reg, short value){
  - Output：
  - Return：
 *****************************************************/
+/*
+void CPUs::setRegUnsignedValue(MicroCom::Regs reg, unsigned short value){
+    unsigned short* rst = selectReg(reg);
+    if( reg >= MicroCom::ax && reg < MicroCom::al ){
+        *rst = value;
+    }
+    else{
+        if(reg >=MicroCom::al && reg<=MicroCom::dl){
+            *rst &= 0xff00;
+        }
+        else{
+            *rst &= 0x00ff;
+            value <<= 8;
+        }
+        *rst |= value;
+    }
+}*/
+
 void CPUs::setRegUnsignedValue(MicroCom::Regs reg, unsigned short value){
     unsigned short* rst = selectReg(reg);
     if( reg >= MicroCom::ax && reg < MicroCom::al ){

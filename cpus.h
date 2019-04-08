@@ -4,87 +4,64 @@
 #include "datatype.h"
 #include <QDebug>
 #include <QTimer>
+#include <QTime>
+#include <QCoreApplication>
 
 class CPUs : public Hardwares
 {
 public:
     CPUs();
+    CPUs(QString cpuName);
 private:
     Q_OBJECT
     unsigned short innerReg[14];
     Voltage pins[34];
-    unsigned short ax;
-    unsigned short bx;
-    unsigned short cx;
-    unsigned short dx;
-    unsigned short cs;
-    unsigned short ds;
-    unsigned short es;
-    unsigned short ss;
-    unsigned short bp;
-    unsigned short sp;
-    unsigned short si;
-    unsigned short di;
-    unsigned short ip;
-    unsigned short flags;
-    Voltage AD[16];
-    Voltage AS[4];
-    Voltage Mio;
-    Voltage wr;
-    Voltage rd;
-    Voltage den;
-    Voltage bhe;
-    Voltage DTr;
-    Voltage ALE;
-    Voltage READY;
-    Voltage RESET;
-    Voltage NMI;
-    Voltage inta;
-    Voltage INTR;
-    Voltage test;
-    Voltage CLK;
-
+    int clk_cpu;
     int address;
     unsigned short data;
-
+    ~CPUs();
 public:
-    //get the pointer to the pin
-    Voltage* selectPin(MicroCom::Pins pin);
+    //set the pin's voltage
+    void setPinVoltage(MicroCom::Pins pin, Voltage value);
+    //get the pin's voltage
+    Voltage getPinVoltage(MicroCom::Pins pin);
+    //set the ADDRESS BUS by addr
     void setAddrPinsVoltage(int addr);
 
-    //get the pointer to the register
-    unsigned short* selectReg(MicroCom::Regs reg);
     //get the Register's value
     unsigned short getRegValue(MicroCom::Regs reg);
-    unsigned short getDataValue(MicroCom::RegsLen len = MicroCom::dbyte);
+    //get the Register's value by pos
     Voltage getRegValue(MicroCom::Regs reg, short pos);
+    //get the DATA BUS value
+    unsigned short getDataValue(MicroCom::RegsLen len = MicroCom::dbyte);
+
     //set the Register's value
     void setRegValue(MicroCom::Regs reg, short value);
-    void setRegValue(MicroCom::Regs reg, Voltage biValue, short pos);
     void setRegUnsignedValue(MicroCom::Regs reg, unsigned short value);
+    //set the Register's value by pos
+    void setRegValue(MicroCom::Regs reg, Voltage biValue, short pos);
 
-    //读总线周期
+    //read bus cycle
     unsigned short readBusCycle(int phyAddr);
-    //写总线周期
+    //write bus cycle
     void writeBusCycle(int phyAddr, unsigned short value);
 
-    //对上游原件的引脚电平变化做出反应的函数
-    void handleOuterVolChange(MicroCom::Pins pinT, Voltage senderVol);
-
+    //判断是否为奇数
+    bool isOdd(int i);
+    //非阻塞延时函数
+    void delaymsec(int msec);
 
 signals:
+    //仿真时钟信号
+    void clockSignal(MicroCom::ClockType);
 
 public slots:
     //对本原件引脚电平变化做出反应的函数
     void handleInnerVolChange(MicroCom::Pins pin);
-    //reset
     void resetCPU();
-    void T1();
-    void T2();
-    void T3();
-    void T4();
 
-
+protected:
+    void timerEvent(QTimerEvent *e);
 };
 
 #endif // CPUS_H

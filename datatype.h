@@ -5,43 +5,44 @@
 #define DATANUM 16
 #define SEC 1000
 
+static int sClock = 0;//仿真时钟
 namespace MicroCom{
 //引脚号
 enum Pins{
-    AD1=1,
-    AD2=2,
-    AD3=3,
-    AD4=4,
-    AD5=5,
-    AD6=6,
-    AD7=7,
-    AD8=8,
-    AD9=9,
-    AD10=10,
-    AD11=11,
-    AD12=12,
-    AD13=13,
-    AD14=14,
-    AD15=15,
-    AD16=16,
-    AS17=17,
-    AS18=18,
-    AS19=19,
-    AS20=20,
-    rd=21,
-    wr=22,
-    Mio=23,
-    ALE=24,
-    DTr=25,
-    den=26,
-    bhe=27,
-    NMI=28,
-    INTR=29,
-    inta=30,
-    READY=31,
-    RESET=32,
-    test=33,
-    CLK=34,
+    AD1=0,
+    AD2=1,
+    AD3=2,
+    AD4=3,
+    AD5=4,
+    AD6=5,
+    AD7=6,
+    AD8=7,
+    AD9=8,
+    AD10=9,
+    AD11=10,
+    AD12=11,
+    AD13=12,
+    AD14=13,
+    AD15=14,
+    AD16=15,
+    AS17=16,
+    AS18=17,
+    AS19=18,
+    AS20=19,
+    rd=20,
+    wr=21,
+    Mio=22,
+    ALE=23,
+    DTr=24,
+    den=25,
+    bhe=26,
+    NMI=27,
+    INTR=28,
+    inta=29,
+    READY=30,
+    RESET=31,
+    test=32,
+    CLK=33,
     gnd=50,
     vcc=51
 };
@@ -82,6 +83,11 @@ enum RegsLen{
 enum Mode{
     write,
     read
+};
+
+enum ClockType{
+    lowPulse=0,
+    highPulse=1
 };
 
 }

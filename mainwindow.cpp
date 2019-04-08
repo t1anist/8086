@@ -6,9 +6,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    cp1 = new CPUs();
-    cp1->readBusCycle(0x1234);
-
+    cp1 = new CPUs("cp1");
+    cp2 = new CPUs("cp2");
+    link(cp1,MicroCom::AD1,cp2,MicroCom::RESET);
+    cp1->readBusCycle(0x0001);
+    //cp1->setPinVoltage(MicroCom::RESET,high);
 }
 
 MainWindow::~MainWindow()
@@ -23,10 +25,18 @@ void MainWindow::mov(CPUs *cp, MicroCom::Regs reg, unsigned short value){
 }
 
 //mov寄存器寻址
-void MainWindow::mov(CPUs *cp, MicroCom::Regs regD, MicroCom::Regs regS){
-    cp->setRegUnsignedValue(regD,cp->getRegValue(regS));
+void MainWindow::mov(CPUs *cp, MicroCom::Regs regD, MicroCom::Regs regS, bool isIndirect){
+    unsigned short rst = 0;
+    if(isIndirect==true){
+        rst = regIndiAddressing(cp,regS);
+    }
+    else{
+        rst = cp->getRegValue(regS);
+    }
+    cp->setRegUnsignedValue(regD,rst);
     return;
 }
+
 
 //寄存器间接寻址(read)
 unsigned short MainWindow::regIndiAddressing(CPUs*cp, MicroCom::Regs reg){
@@ -66,7 +76,13 @@ void MainWindow::regIndiAddressing(CPUs *cp, MicroCom::Regs reg, unsigned short 
 }
 
 
-void MainWindow::link(Hardwares* sender, Voltage volS, Hardwares* target, MicroCom::Pins pinT){
-    connect(sender, &Hardwares::pinVolChanged, [=](){target->handleOuterVolChange(pinT,volS);});
+//连线函数
+void MainWindow::link(Hardwares* sender, MicroCom::Pins pinS, Hardwares* receiver, MicroCom::Pins pinR){
+    connect(sender, &Hardwares::pinVolChanged, [=](MicroCom::Pins pinC){
+        if(pinC==pinS){
+            receiver->setPinVoltage(pinR,sender->getPinVoltage(pinS));
+        }
+    });
     return;
 }
+

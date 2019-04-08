@@ -10,16 +10,13 @@ class Hardwares : public QWidget
 private:
     Voltage VCC;
     Voltage gnd;
+    QString hardwareName;
 public:
     explicit Hardwares(QWidget *parent = nullptr);
-
-    virtual Voltage* selectPin(MicroCom::Pins pin)=0;
-    virtual void handleOuterVolChange(MicroCom::Pins pinT, Voltage senderVol)=0;
-
-    bool setVoltage(MicroCom::Pins pin, Voltage pinVol);
-    Voltage getPinVoltage(MicroCom::Pins pin);
-
-    void setValueByPos(unsigned short &value, short pos, MicroCom::Regs reg, Voltage biValue);
+    virtual void setPinVoltage(MicroCom::Pins pin, Voltage value)=0;
+    virtual Voltage getPinVoltage(MicroCom::Pins pin)=0;
+    void setHardwareName(QString hdName);
+    QString getHardwareName();
 
     //True Form(原码) to Complement Form(补码)
     unsigned short toCompForm(short value, MicroCom::RegsLen len = MicroCom::dbyte);
@@ -29,9 +26,7 @@ public:
     unsigned short toDenary(short binary[]);
 
 signals:
-    void pinVolChanged(MicroCom::Pins);
-
-public slots:
+    void pinVolChanged(MicroCom::Pins pin);
 };
 
 #endif // HARDWARES_H

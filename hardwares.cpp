@@ -1,67 +1,16 @@
 #include "hardwares.h"
-#include "cpus.h"
 
 Hardwares::Hardwares(QWidget *parent) : QWidget(parent)
 {
 
 }
 
-/****************************************************
- - Function: set the pin's voltage of 8086 CPU
- - Calls：
-        + unsigned short* selectPin(MicroCom::Pins pin)
- - Called By：
- - Input：[MicroCom::Pins]、[Voltage pinVol(引脚电平)]
- - Output：
- - Return：if succeed, return true; else return false
-*****************************************************/
-bool Hardwares::setVoltage(MicroCom::Pins pin, Voltage pinVol){
-    Voltage* p = selectPin(pin);
-    *p = pinVol;
-    emit pinVolChanged(pin);
-    return true;
+void Hardwares::setHardwareName(QString hdName){
+    hardwareName = hdName;
 }
 
-/****************************************************
- - Function：get the pin's voltage of 8086 CPU
- - Calls：selectPin(MicroCom::Pins pin)
- - Called By：
- - Input：[MicroCom::Pins pin]
- - Output：
- - Return：pin's voltage(high or low)
-*****************************************************/
-Voltage Hardwares::getPinVoltage(MicroCom::Pins pin){
-    return *selectPin(pin);
-}
-
-
-/****************************************************
- - Function：改变8或16位寄存器某一位的值
- - Calls：
- - Called By：
- - Input：
- - Output：
- - Return：
-*****************************************************/
-void Hardwares::setValueByPos(unsigned short &value, short pos, MicroCom::Regs reg, Voltage biValue){
-    unsigned short flag = 0;
-    unsigned short temp = 1;
-    if(biValue==high){
-        flag = 1;
-    }
-    //Registers excluding ah, bh, ch and dh
-    if(reg>=MicroCom::ax && reg<MicroCom::ah){
-        flag <<= pos;
-        temp <<= pos;
-    }
-    //ah, bh, ch or dh
-    else{
-        flag <<= (pos+8);
-        temp <<= (pos+8);
-    }
-    temp = ~temp;
-    value &= temp;
-    value |= flag;
+QString Hardwares::getHardwareName(){
+    return hardwareName;
 }
 
 /****************************************************

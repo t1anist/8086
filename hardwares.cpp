@@ -9,6 +9,13 @@ void Hardwares::setHardwareName(QString hdName){
     hardwareName = hdName;
 }
 
+
+/****************************************************
+ - Function：get the hardware's name
+ - Description：
+ - Input：
+ - Return：hardware's name(QString)
+*****************************************************/
 QString Hardwares::getHardwareName(){
     return hardwareName;
 }
@@ -16,10 +23,7 @@ QString Hardwares::getHardwareName(){
 /****************************************************
  - Function：True Form to Complement Form
  - Description：The default length of the regs is 16-bit
- - Calls：
- - Called By：
  - Input：[value(true form), MicroCom::RegsLen]
- - Output：
  - Return：value(complement form)[16-bit unsigned short]
 *****************************************************/
 unsigned short Hardwares::toCompForm(short value, MicroCom::RegsLen len){
@@ -38,10 +42,7 @@ unsigned short Hardwares::toCompForm(short value, MicroCom::RegsLen len){
 /****************************************************
  - Function：complement form to signed true form
  - Description：The default length of the regs is 16-bit
- - Calls：
- - Called By：
  - Input：[value(complement form), MicroCom::RegsLen]
- - Output：
  - Return：a signed short number in true form
 *****************************************************/
 short Hardwares::toTrueForm(unsigned short value, MicroCom::RegsLen len){
@@ -63,10 +64,7 @@ short Hardwares::toTrueForm(unsigned short value, MicroCom::RegsLen len){
 /****************************************************
  - Function：complement form to signed true form
  - Description：The default length of the regs is 16-bit
- - Calls：
- - Called By：
  - Input：[value(complement form), MicroCom::RegsLen]
- - Output：
  - Return：a signed short number in true form
 *****************************************************/
 void Hardwares::toBinary(int denary, short binary[]){
@@ -88,10 +86,7 @@ void Hardwares::toBinary(int denary, short binary[]){
 /****************************************************
  - Function：complement form to signed true form
  - Description：The default length of the regs is 16-bit
- - Calls：
- - Called By：
  - Input：[value(complement form), MicroCom::RegsLen]
- - Output：
  - Return：a signed short number in true form
 *****************************************************/
 unsigned short Hardwares::toDenary(short binary[]){
@@ -104,3 +99,14 @@ unsigned short Hardwares::toDenary(short binary[]){
     return rst;
 }
 
+/****************************************************
+ - Function：delay or sleep
+ - Description：非阻塞延时
+ - Input：msec（毫秒）
+ - Return：
+*****************************************************/
+void Hardwares::delaymsec(int msec){
+    QTime dieTime = QTime::currentTime().addMSecs(msec);
+    while( QTime::currentTime() < dieTime )
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+}

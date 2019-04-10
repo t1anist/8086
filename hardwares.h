@@ -2,14 +2,15 @@
 #define HARDWARES_H
 
 #include <QWidget>
+#include <QTime>
+#include <QDebug>
+#include <QCoreApplication>
 #include "datatype.h"
 
 class Hardwares : public QWidget
 {
     Q_OBJECT
 private:
-    Voltage VCC;
-    Voltage gnd;
     QString hardwareName;
 public:
     explicit Hardwares(QWidget *parent = nullptr);
@@ -24,6 +25,8 @@ public:
     short toTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
     void toBinary(int denary, short binary[]);
     unsigned short toDenary(short binary[]);
+    //非阻塞延时函数
+    void delaymsec(int msec);
 
 signals:
     void pinVolChanged(MicroCom::Pins pin);

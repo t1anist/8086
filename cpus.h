@@ -4,22 +4,19 @@
 #include "datatype.h"
 #include <QDebug>
 #include <QTimer>
-#include <QTime>
-#include <QCoreApplication>
 
 class CPUs : public Hardwares
 {
 public:
-    CPUs();
-    CPUs(QString cpuName);
+    CPUs(QString cpuName = nullptr);
 private:
     Q_OBJECT
-    unsigned short innerReg[14];
-    Voltage pins[34];
+    unsigned short innerReg[CPU_REG_NUM];
+    Voltage pins[CPU_PIN_NUM];
     int clk_cpu;
     int address;
     unsigned short data;
-    ~CPUs();
+    Counter<CPUs> c;
 public:
     //set the pin's voltage
     void setPinVoltage(MicroCom::Pins pin, Voltage value);
@@ -48,20 +45,11 @@ public:
 
     //判断是否为奇数
     bool isOdd(int i);
-    //非阻塞延时函数
-    void delaymsec(int msec);
+    void resetCPU();
+    static int howMany(){return Counter<CPUs>::howMany();}
 
 signals:
-    //仿真时钟信号
-    void clockSignal(MicroCom::ClockType);
-
-public slots:
-    //对本原件引脚电平变化做出反应的函数
-    void handleInnerVolChange(MicroCom::Pins pin);
-    void resetCPU();
-
-protected:
-    void timerEvent(QTimerEvent *e);
+    void resetSignal();
 };
 
 #endif // CPUS_H

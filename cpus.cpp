@@ -1,30 +1,23 @@
 #include "cpus.h"
 
-CPUs::CPUs()
-{
-    //一旦8086CPU的引脚值发生改变，就调用handleInnerVolChange槽函数执行相关操作
-    connect(this,&CPUs::pinVolChanged,this,&CPUs::handleInnerVolChange);
-    //clk_cpu = startTimer(500);//0.5秒一个脉冲
-}
-
 CPUs::CPUs(QString cpuName){
+    if(cpuName == nullptr){
+        cpuName = "CPU_"+QString::number(c.howMany());
+    }
     setHardwareName(cpuName);
-    connect(this,&CPUs::pinVolChanged,this,&CPUs::handleInnerVolChange);
-}
-
-CPUs::~CPUs(){
-    delete this;
-    //killTimer(clk_cpu);
+    //init pin's voltage
+    for(int i=0;i<CPU_PIN_NUM;i++){
+        pins[i]=inf;
+    }
 }
 
 /****************************************************
- - Function：get the register's value
+ - Function：获取寄存器的值
  - Calls：
  - Called By：
-        + getRegValue(MicroCom::Regs reg,short pos)
- - Input：[MicroCom::Regs]
- - Output：
- - Return：16-bit value of the reg
+        + getRegValue(MicroCom::Regs reg, short pos)
+ - Input：8086CPU内部寄存器号(reg)
+ - Return：寄存器的值（类型：unsigned short）
 *****************************************************/
 unsigned short CPUs::getRegValue(MicroCom::Regs reg){
     if( reg >= MicroCom::ax && reg < MicroCom::al ){
@@ -40,7 +33,14 @@ unsigned short CPUs::getRegValue(MicroCom::Regs reg){
     }
 }
 
-//获取数据线上的数据，转化为unsigned short值
+/****************************************************
+ - Function：获取数据线的值
+ - Calls：
+ - Called By：
+        + getRegValue(MicroCom::Regs reg,short pos)
+ - Input：寄存器的长度（8位or16位）
+ - Return：数据线表示的值（类型：unsigned short）
+*****************************************************/
 unsigned short CPUs::getDataValue(MicroCom::RegsLen len){
     short value[DATANUM] ={0};
     int numlen = static_cast<int>(len);
@@ -124,8 +124,8 @@ void CPUs::setRegUnsignedValue(MicroCom::Regs reg, unsigned short value){
 }
 
 /****************************************************
- - Function：set the register's value in a particular position
- - Description：pos limit(16-bit:0-15 8-bit:0-7)
+ - Function：设置寄存器某一位的值
+ - Description：位限制(16-bit:0-15 8-bit:0-7)
  - Calls：
  - Called By：
  - Input：[MicroCom::Regs]
@@ -154,11 +154,10 @@ void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, short pos){
 }
 
 /****************************************************
- - Function：set the AD and AS pins' voltage
- - Description：是不是应该考虑给地址单独搞一个信号？
+ - Function：设置地址线
  - Calls：
  - Called By：
- - Input：address
+ - Input：20位地址变量（addr）
  - Output：
  - Return：
 *****************************************************/
@@ -169,71 +168,69 @@ void CPUs::setAddrPinsVoltage(int addr){
         (binary[i])?pins[i]=high:pins[i]=low;
         emit pinVolChanged(static_cast<MicroCom::Pins>(i));
     }
-
 }
 
 //总线操作时序！怎么实现捏
 unsigned short CPUs::readBusCycle(int phyAddr){
     address = phyAddr;
     qDebug()<<"============"<<getHardwareName()<<"===========";
-    /** T1 **/
-    qDebug()<<"T1 start";
+    qDebug()<<"============T1 start=============";
     //【Mio】在整个总线周期中均有效，由于进行存储器操作，故Mio高电平
-    setPinVoltage(MicroCom::Mio,high);
+    setPinVoltage(MicroCom::CP_Mio,high);
     //【bhe】T1期间有效，高电平表示数据线的高8位无效，低电平表示有效
-    setPinVoltage(MicroCom::bhe,low);
+    setPinVoltage(MicroCom::CP_bhe,low);
     //【AD1~AD16】【AS17~AS20】T1期间输出地址
     qDebug()<<"now start to change address lins";
     setAddrPinsVoltage(address);
     //【ALE】在T1期间，地址锁存有效信号，是一个正脉冲，其余时间均为低电平
 
-    setPinVoltage(MicroCom::ALE,high);
+    setPinVoltage(MicroCom::CP_ALE,high);
     //【DTr】在T1~T4内保持低电平，T4周期一半时变高电平
-    setPinVoltage(MicroCom::DTr,low);
+    setPinVoltage(MicroCom::CP_DTr,low);
     //【den】初始为高电平
-    setPinVoltage(MicroCom::den,high);
-    delaymsec(500);
+    setPinVoltage(MicroCom::CP_den,high);
+    //delaymsec(500);
 
     //延时半周期后
-    qDebug()<<"T1 half";
-    setPinVoltage(MicroCom::ALE,low);
-    delaymsec(500);
-    qDebug()<<"T1 end";
+    qDebug()<<"============T1 half=============";
+    setPinVoltage(MicroCom::CP_ALE,low);
+    //delaymsec(500);
+    qDebug()<<"=============T1 end=============";
 
     /** T2 **/
-    qDebug()<<"T2 start";
+    qDebug()<<"============T2 start=============";
     //【bhe】在T2~T4期间均为高电平
-    setPinVoltage(MicroCom::bhe,high);
+    setPinVoltage(MicroCom::CP_bhe,high);
     //【AD1~AD16】T2开始时变为高阻
     for(int i=1;i<16;i++){
-        pins[i]=himped;
+        pins[i]=inf;
     }
     //【rd】在T2开始时变成低电平
-    setPinVoltage(MicroCom::rd,low);
+    setPinVoltage(MicroCom::CP_rd,low);
     //【den】在T2~T4输出期间低电平，表示数据有效，用来实现数据的选通
-    setPinVoltage(MicroCom::den,low);
-    delaymsec(1000);
-    qDebug()<<"T2 end";
+    setPinVoltage(MicroCom::CP_den,low);
+    //delaymsec(1000);
+    qDebug()<<"============T2 end=============";
 
     /** T3 **/
-    qDebug()<<"T3 start";
+    qDebug()<<"============T3 start============";
     //【AD1~AD16】在T3开始时接受数据
     data = getDataValue();
-    delaymsec(1000);
-    qDebug()<<"T3 end";
+   // delaymsec(1000);
+    qDebug()<<"============T3 end=============";
 
     /** T4 **/
-    qDebug()<<"T4 start";
+    qDebug()<<"============T4 start============";
     //【rd】在T3结束时变高电平
-    setPinVoltage(MicroCom::rd,high);
+    setPinVoltage(MicroCom::CP_rd,high);
     //【den】在T4开始时变高
-    setPinVoltage(MicroCom::den,high);
+    setPinVoltage(MicroCom::CP_den,high);
     //【AD1~AD16】在T4开始时变为高阻态
     for(int i=0;i<16;i++){
-        pins[i]=himped;
+        pins[i]=inf;
     }
-    delaymsec(1000);
-    qDebug()<<"T4 end";
+    //delaymsec(1000);
+    qDebug()<<"============T4 end=============";
     return data;
 }
 
@@ -251,67 +248,68 @@ void CPUs::writeBusCycle(int phyAddr, unsigned short value){
 
 void CPUs::setPinVoltage(MicroCom::Pins pin, Voltage value){
     pins[pin]=value;
-    emit pinVolChanged(pin);
+    if(pin==MicroCom::CP_RESET){
+        if(pins[pin]==high){
+            resetCPU();
+        }
+    }
+    if(value!=inf){
+        emit pinVolChanged(pin);
+    }
 }
 
 Voltage CPUs::getPinVoltage(MicroCom::Pins pin){
     return pins[pin];
 }
 
-//8086CPU的复位函数
-//高电平后呈高阻怎么表示
+/****************************************************
+ - Function：8086CPU复位
+ - Calls：
+    + void CPUs::setPinVoltage(MicroCom::Pins pin, Voltage value)
+ - Called By：
+ - Input：
+ - return：
+*****************************************************/
 void CPUs::resetCPU(){
     qDebug()<<"====================";
     qDebug()<<"====RESET START!====";
     qDebug()<<"====================";
-    //set registers' value
+    /** set registers' value **/
     innerReg[MicroCom::flags]=0;
     innerReg[MicroCom::cs]=0;
     innerReg[MicroCom::ip]=0;
     innerReg[MicroCom::ds]=0;
     innerReg[MicroCom::es]=0;
     innerReg[MicroCom::ss]=0;
-    //set pins' voltage
+    /** set pins' value **/
     for(int i=0;i<ADDRNUM;i++){
-        pins[i]=himped;
+        pins[i]=inf;
     }
-    setPinVoltage(MicroCom::ALE,low);
+    setPinVoltage(MicroCom::CP_ALE,low);
     //inta 高电平后呈高阻
+    setPinVoltage(MicroCom::CP_inta,high);
+    setPinVoltage(MicroCom::CP_inta,inf);
     //rd 高电平后呈高阻
+    setPinVoltage(MicroCom::CP_rd,high);
+    setPinVoltage(MicroCom::CP_rd,inf);
     //wr 高电平后呈高阻
+    setPinVoltage(MicroCom::CP_wr,high);
+    setPinVoltage(MicroCom::CP_wr,inf);
     //Mio 高电平后呈高阻
+    setPinVoltage(MicroCom::CP_Mio,high);
+    setPinVoltage(MicroCom::CP_Mio,inf);
     //DTr 高电平后呈高阻
+    setPinVoltage(MicroCom::CP_DTr,high);
+    setPinVoltage(MicroCom::CP_DTr,inf);
     //den 高电平后呈高阻
-    pins[MicroCom::RESET]=low;
+    setPinVoltage(MicroCom::CP_den,high);
+    setPinVoltage(MicroCom::CP_den,inf);
+    //RESET引脚复位
+    pins[MicroCom::CP_RESET]=low;
     qDebug()<<"====================";
     qDebug()<<"===RESET SUCCEES!===";
     qDebug()<<"====================";
     return;
-}
-
-/****************************************************
- - Function：set the AD and AS pins' voltage
- - Description：
- - Calls：
- - Called By：
- - Input：address
- - Output：
- - Return：
-*****************************************************/
-void CPUs::handleInnerVolChange(MicroCom::Pins pin){
-    if(pin==MicroCom::RESET && pins[pin]==high){
-        resetCPU();
-    }
-}
-
-void CPUs::timerEvent(QTimerEvent *e){
-    sClock++;
-    if(isOdd(sClock)==true){
-        emit clockSignal(MicroCom::highPulse);
-    }
-    else{
-        emit clockSignal(MicroCom::lowPulse);
-    }
 }
 
 //判断是否为奇数
@@ -319,11 +317,4 @@ bool CPUs::isOdd(int i){
     return (i&1) == 1;
 }
 
-void CPUs::delaymsec(int msec)
-{
-    QTime dieTime = QTime::currentTime().addMSecs(msec);
 
-    while( QTime::currentTime() < dieTime )
-
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-}

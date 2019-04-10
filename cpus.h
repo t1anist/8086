@@ -15,11 +15,13 @@ private:
     Voltage pins[CPU_PIN_NUM];
     int clk_cpu;
     int address;
+    int T;  //周期
     unsigned short data;
     Counter<CPUs> c;
 public:
     //set the pin's voltage
     void setPinVoltage(MicroCom::Pins pin, Voltage value);
+    void handlePinVolChanges(MicroCom::Pins pin, Voltage value);
     //get the pin's voltage
     Voltage getPinVoltage(MicroCom::Pins pin);
     //set the ADDRESS BUS by addr

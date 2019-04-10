@@ -1,6 +1,7 @@
 #include "cpus.h"
 
 CPUs::CPUs(QString cpuName){
+    T=100;
     if(cpuName == nullptr){
         cpuName = "CPU_"+QString::number(c.howMany());
     }
@@ -175,21 +176,21 @@ unsigned short CPUs::readBusCycle(int phyAddr){
     address = phyAddr;
     qDebug()<<"============"<<getHardwareName()<<"===========";
     qDebug()<<"============T1 start=============";
-    //【Mio】在整个总线周期中均有效，由于进行存储器操作，故Mio高电平
-    setPinVoltage(MicroCom::CP_Mio,high);
-    //【bhe】T1期间有效，高电平表示数据线的高8位无效，低电平表示有效
-    setPinVoltage(MicroCom::CP_bhe,low);
     //【AD1~AD16】【AS17~AS20】T1期间输出地址
     qDebug()<<"now start to change address lins";
     setAddrPinsVoltage(address);
     //【ALE】在T1期间，地址锁存有效信号，是一个正脉冲，其余时间均为低电平
-
     setPinVoltage(MicroCom::CP_ALE,high);
+
+    //【Mio】在整个总线周期中均有效，由于进行存储器操作，故Mio高电平
+    setPinVoltage(MicroCom::CP_Mio,high);
+    //【bhe】T1期间有效，高电平表示数据线的高8位无效，低电平表示有效
+    setPinVoltage(MicroCom::CP_bhe,low);
+
     //【DTr】在T1~T4内保持低电平，T4周期一半时变高电平
     setPinVoltage(MicroCom::CP_DTr,low);
     //【den】初始为高电平
     setPinVoltage(MicroCom::CP_den,high);
-    //delaymsec(500);
 
     //延时半周期后
     qDebug()<<"============T1 half=============";
@@ -199,12 +200,12 @@ unsigned short CPUs::readBusCycle(int phyAddr){
 
     /** T2 **/
     qDebug()<<"============T2 start=============";
-    //【bhe】在T2~T4期间均为高电平
-    setPinVoltage(MicroCom::CP_bhe,high);
     //【AD1~AD16】T2开始时变为高阻
     for(int i=1;i<16;i++){
         pins[i]=inf;
     }
+    //【bhe】在T2~T4期间均为高电平
+    setPinVoltage(MicroCom::CP_bhe,high);
     //【rd】在T2开始时变成低电平
     setPinVoltage(MicroCom::CP_rd,low);
     //【den】在T2~T4输出期间低电平，表示数据有效，用来实现数据的选通
@@ -214,6 +215,7 @@ unsigned short CPUs::readBusCycle(int phyAddr){
 
     /** T3 **/
     qDebug()<<"============T3 start============";
+    delaymsec(T);
     //【AD1~AD16】在T3开始时接受数据
     data = getDataValue();
    // delaymsec(1000);
@@ -221,14 +223,14 @@ unsigned short CPUs::readBusCycle(int phyAddr){
 
     /** T4 **/
     qDebug()<<"============T4 start============";
-    //【rd】在T3结束时变高电平
-    setPinVoltage(MicroCom::CP_rd,high);
-    //【den】在T4开始时变高
-    setPinVoltage(MicroCom::CP_den,high);
     //【AD1~AD16】在T4开始时变为高阻态
     for(int i=0;i<16;i++){
         pins[i]=inf;
     }
+    //【rd】在T3结束时变高电平
+    setPinVoltage(MicroCom::CP_rd,high);
+    //【den】在T4开始时变高
+    setPinVoltage(MicroCom::CP_den,high);
     //delaymsec(1000);
     qDebug()<<"============T4 end=============";
     return data;
@@ -248,13 +250,13 @@ void CPUs::writeBusCycle(int phyAddr, unsigned short value){
 
 void CPUs::setPinVoltage(MicroCom::Pins pin, Voltage value){
     pins[pin]=value;
-    if(pin==MicroCom::CP_RESET){
-        if(pins[pin]==high){
-            resetCPU();
-        }
-    }
-    if(value!=inf){
-        emit pinVolChanged(pin);
+    emit pinVolChanged(pin);
+}
+
+void CPUs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
+    pins[pin]=value;
+    if(pin==MicroCom::CP_RESET && pins[pin]==high){
+        resetCPU();
     }
 }
 

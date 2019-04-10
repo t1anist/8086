@@ -14,7 +14,7 @@ private:
     QString hardwareName;
 public:
     explicit Hardwares(QWidget *parent = nullptr);
-    virtual void setPinVoltage(MicroCom::Pins pin, Voltage value)=0;
+    virtual void handlePinVolChanges(MicroCom::Pins pin, Voltage value)=0;
     virtual Voltage getPinVoltage(MicroCom::Pins pin)=0;
     void setHardwareName(QString hdName);
     QString getHardwareName();

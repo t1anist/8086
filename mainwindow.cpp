@@ -100,7 +100,7 @@ void MainWindow::regIndiAddressing(CPUs *cp, MicroCom::Regs reg, unsigned short 
 void MainWindow::link(Hardwares* sender, MicroCom::Pins pinS, Hardwares* receiver, MicroCom::Pins pinR){
     connect(sender, &Hardwares::pinVolChanged, [=](MicroCom::Pins pinC){
         if(pinC==pinS){
-            receiver->setPinVoltage(pinR,sender->getPinVoltage(pinS));
+            receiver->handlePinVolChanges(pinR,sender->getPinVoltage(pinS));
         }
     });
     return;

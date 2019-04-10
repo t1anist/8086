@@ -9,13 +9,13 @@ private:
     const int BF5_START = 100;
     Voltage pins[BUFFER_PIN_NUM];
     Counter<Buffers245> c;
+    int status;
 
 public:
     Buffers245(QString bufferName=nullptr);
     void setPinVoltage(MicroCom::Pins pin, Voltage value);
     void handlePinVolChanges(MicroCom::Pins pin, Voltage value);
     Voltage getPinVoltage(MicroCom::Pins pin);
-    void setOutputVoltage();
     //计数器
     static int howMany(){return Counter<Buffers245>::howMany();}
 };

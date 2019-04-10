@@ -23,7 +23,6 @@ public:
     void setPinVoltage(MicroCom::Pins pin, Voltage value);
     void handlePinVolChanges(MicroCom::Pins pin, Voltage);
     Voltage getPinVoltage(MicroCom::Pins pin);
-    void setOutputVoltage();
     static int howMany(){return Counter<Decoders>::howMany();}
 };
 

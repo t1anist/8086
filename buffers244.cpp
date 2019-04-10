@@ -1,6 +1,7 @@
 #include "buffers244.h"
 
 Buffers244::Buffers244(QString bufferName){
+    status=0;
     //初始化命名
     if(bufferName == nullptr){
         bufferName = "74LS244_" + QString::number(c.howMany());
@@ -25,13 +26,6 @@ Voltage Buffers244::getPinVoltage(MicroCom::Pins pin){
 //处理外部引脚电平改变函数，无需发送信号
 void Buffers244::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
     pins[pin-BF4_START]=value;
-    if(pin==MicroCom::BF4_Ga || pin==MicroCom::BF4_Gb){
-        setOutputVoltage(pin,Buffers244::getPinVoltage(pin));
-    }
-}
-
-
-void Buffers244::setOutputVoltage(MicroCom::Pins pin, Voltage value){
     //如果使能端Ga有效，则数据从1I(80~83,pins[0~3])端口->1O(84~87,pins[4~7])端口
     if(pin==MicroCom::BF4_Ga){
         for(int i=0;i<4;i++){
@@ -67,3 +61,4 @@ void Buffers244::setOutputVoltage(MicroCom::Pins pin, Voltage value){
         qDebug()<<"2A4="<<Buffers244::getPinVoltage(MicroCom::BF4_2O4);
     }
 }
+

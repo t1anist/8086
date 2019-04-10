@@ -6,16 +6,36 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    cp1 = new CPUs("cp1");
-    cp2 = new CPUs("cp2");
-    link(cp1,MicroCom::AD1,cp2,MicroCom::RESET);
-    cp1->readBusCycle(0x0001);
-    //cp1->setPinVoltage(MicroCom::RESET,high);
+    cp1 = new CPUs();
+    cp2 = new CPUs();
+    qDebug()<<cp1->getHardwareName();
+    qDebug()<<cp2->getHardwareName();
+    la1 = new Latchs();
+    qDebug()<<la1->getHardwareName();
+    /** 将CPU的地址线与74LS373锁存器的输入端相连 **/
+    link(cp1,MicroCom::CP_AD0,la1,MicroCom::LA_DI0);
+    link(cp1,MicroCom::CP_AD1,la1,MicroCom::LA_DI1);
+    link(cp1,MicroCom::CP_AD2,la1,MicroCom::LA_DI2);
+    link(cp1,MicroCom::CP_AD3,la1,MicroCom::LA_DI3);
+    link(cp1,MicroCom::CP_AD4,la1,MicroCom::LA_DI4);
+    link(cp1,MicroCom::CP_AD5,la1,MicroCom::LA_DI5);
+    link(cp1,MicroCom::CP_AD6,la1,MicroCom::LA_DI6);
+    link(cp1,MicroCom::CP_AD7,la1,MicroCom::LA_DI7);
+    link(cp1,MicroCom::CP_Mio,la1,MicroCom::LA_G);
+    link(cp1,MicroCom::CP_den,la1,MicroCom::LA_oe);
+    //cp1->readBusCycle(0x00ff);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    ui=nullptr;
+    delete cp1;
+    cp1=nullptr;
+    delete cp2;
+    cp2=nullptr;
+    delete la1;
+    la1=nullptr;
 }
 
 //mov立即数寻址

@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QTimer>
 #include "cpus.h"
+#include "latchs.h"
 
 namespace Ui {
 class MainWindow;
@@ -32,7 +33,9 @@ private:
     Ui::MainWindow *ui;
     CPUs* cp1;
     CPUs* cp2;
-    CPUs* cp3;
+    Latchs* la1;
+    Latchs* la2;
+
 };
 
 #endif // MAINWINDOW_H

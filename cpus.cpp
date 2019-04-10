@@ -181,16 +181,17 @@ unsigned short CPUs::readBusCycle(int phyAddr){
     setAddrPinsVoltage(address);
     //【ALE】在T1期间，地址锁存有效信号，是一个正脉冲，其余时间均为低电平
     setPinVoltage(MicroCom::CP_ALE,high);
-
-    //【Mio】在整个总线周期中均有效，由于进行存储器操作，故Mio高电平
-    setPinVoltage(MicroCom::CP_Mio,high);
     //【bhe】T1期间有效，高电平表示数据线的高8位无效，低电平表示有效
     setPinVoltage(MicroCom::CP_bhe,low);
+    //【Mio】在整个总线周期中均有效，由于进行存储器操作，故Mio高电平
+    setPinVoltage(MicroCom::CP_Mio,high);
 
+
+    //【den】初始为高电平(den必须在DTr之前改变）
+    setPinVoltage(MicroCom::CP_den,high);
     //【DTr】在T1~T4内保持低电平，T4周期一半时变高电平
     setPinVoltage(MicroCom::CP_DTr,low);
-    //【den】初始为高电平
-    setPinVoltage(MicroCom::CP_den,high);
+
 
     //延时半周期后
     qDebug()<<"============T1 half=============";
@@ -255,7 +256,7 @@ void CPUs::setPinVoltage(MicroCom::Pins pin, Voltage value){
 
 void CPUs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
     pins[pin]=value;
-    if(pin==MicroCom::CP_RESET && pins[pin]==high){
+    if(pin==MicroCom::CP_RESET && value==high){
         resetCPU();
     }
 }

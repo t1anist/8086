@@ -6,6 +6,7 @@
 #include <QTimer>
 #include "cpus.h"
 #include "latchs.h"
+#include "buffers245.h"
 
 namespace Ui {
 class MainWindow;
@@ -32,9 +33,11 @@ public:
 private:
     Ui::MainWindow *ui;
     CPUs* cp1;
-    CPUs* cp2;
     Latchs* la1;
     Latchs* la2;
+    Latchs* la3;
+    Buffers245* bf1;
+    Buffers245* bf2;
 
 };
 

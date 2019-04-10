@@ -1,6 +1,8 @@
 #include "decoders.h"
 
 Decoders::Decoders(QString decoderName){
+    pos=0;
+    status=0;
     if(decoderName == nullptr){
         decoderName = "74LS138_" + QString::number(c.howMany());
     }
@@ -13,42 +15,62 @@ Decoders::Decoders(QString decoderName){
     }
 }
 
+//设置引脚电平，并发送输出引脚电平改变信号
 void Decoders::setPinVoltage(MicroCom::Pins pin, Voltage value){
-    pins[pin-60]=value;
-    if(pin==MicroCom::DE_G1 || pin==MicroCom::DE_G2a || pin==MicroCom::DE_G2b){
-        if(pins[MicroCom::DE_G1-60]==high && pins[MicroCom::DE_G2a-60]==low && pins[MicroCom::DE_G2b-60]==low){
-            setOutputVoltage();
-        }
-    }
+    pins[pin-DE_START]=value;
     emit pinVolChanged(pin);
 }
 
+//处理上游引脚电平改变
+void Decoders::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
+    pins[pin-DE_START]=value;
+    //首先只有出发使能端才会有效
+    if(pin==MicroCom::DE_G1 || pin==MicroCom::DE_G2a || pin==MicroCom::DE_G2b){
+        setOutputVoltage();
+    }
+}
+
+//获取引脚电平函数
 Voltage Decoders::getPinVoltage(MicroCom::Pins pin){
-    return pins[pin-60];
+    return pins[pin-DE_START];
 }
 
 void Decoders::setOutputVoltage(){
-    int rst = 0;
-    for(int i=0;i<3;i++){
-        if(pins[i+3]==high){
-            rst += 2^i;
+    //只有使能端均有效时才会触发译码功能
+    if(Decoders::getPinVoltage(MicroCom::DE_G1)==high
+            && Decoders::getPinVoltage(MicroCom::DE_G2a)==low
+            && Decoders::getPinVoltage(MicroCom::DE_G2b)==low){
+        int rst = 0;
+        //ABC（0~7）->相应的"y_"变为低电平
+        for(int i=0;i<3;i++){
+            //C:pins[3],B:pins[4],A:pins[5]
+            if(pins[i+3]==high){
+                rst += 2^i;
+            }
         }
+        //译码器正在执行译码功能
+        //y0:pins[6]
+        setPinVoltage(static_cast<MicroCom::Pins>(rst+6+DE_START),low);
+        status = rst;//status的范围为0~7,表示译码器正在工作
+        qDebug()<<"=========Latch works========";
+        qDebug()<<"y0="<<Decoders::getPinVoltage(MicroCom::DE_y0);
+        qDebug()<<"y1="<<Decoders::getPinVoltage(MicroCom::DE_y1);
+        qDebug()<<"y2="<<Decoders::getPinVoltage(MicroCom::DE_y2);
+        qDebug()<<"y3="<<Decoders::getPinVoltage(MicroCom::DE_y3);
+        qDebug()<<"y4="<<Decoders::getPinVoltage(MicroCom::DE_y4);
+        qDebug()<<"y5="<<Decoders::getPinVoltage(MicroCom::DE_y5);
+        qDebug()<<"y6="<<Decoders::getPinVoltage(MicroCom::DE_y6);
+        qDebug()<<"y7="<<Decoders::getPinVoltage(MicroCom::DE_y7);
+        qDebug()<<"=========Latch ends=========";
     }
-    pins[rst+6]=low;
-    emit pinVolChanged(static_cast<MicroCom::Pins>(rst+66));
-
-    qDebug()<<"=========Latch works========";
-    qDebug()<<"y0="<<getPinVoltage(MicroCom::DE_y0);
-    qDebug()<<"y1="<<getPinVoltage(MicroCom::DE_y1);
-    qDebug()<<"y2="<<getPinVoltage(MicroCom::DE_y2);
-    qDebug()<<"y3="<<getPinVoltage(MicroCom::DE_y3);
-    qDebug()<<"y4="<<getPinVoltage(MicroCom::DE_y4);
-    qDebug()<<"y5="<<getPinVoltage(MicroCom::DE_y5);
-    qDebug()<<"y6="<<getPinVoltage(MicroCom::DE_y6);
-    qDebug()<<"y7="<<getPinVoltage(MicroCom::DE_y7);
-    qDebug()<<"=========Latch ends=========";
-
-    pins[rst+6]=high;
-    emit pinVolChanged(static_cast<MicroCom::Pins>(rst+66));
-
+    //
+    else{
+        //如果译码器处于初始化或者未工作状态，则不重复执行还原操作
+        if(status==8){
+            return;
+        }
+        setPinVoltage(static_cast<MicroCom::Pins>(status+6+DE_START),high);
+        //还原译码器输出端口，将译码器的工作状态置为未工作。
+        status = 8;
+    }
 }

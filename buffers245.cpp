@@ -11,52 +11,62 @@ Buffers245::Buffers245(QString bufferName){
 }
 
 void Buffers245::setPinVoltage(MicroCom::Pins pin, Voltage value){
-    pins[pin-100]=value;
-    if(pin==MicroCom::BF5_g && pins[pin-100]==low){
-        setOutputVoltage();
-    }
+    pins[pin-BF5_START]=value;
     emit pinVolChanged(pin);
 }
 
+void Buffers245::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
+    pins[pin-BF5_START]=value;
+    if(pin==MicroCom::BF5_g){
+        setOutputVoltage();
+    }
+}
+
 Voltage Buffers245::getPinVoltage(MicroCom::Pins pin){
-    return pins[pin-100];
+    return pins[pin-BF5_START];
 }
 
 void Buffers245::setOutputVoltage(){
-    if(pins[MicroCom::BF5_DIR-100]==high){
-        for(int i=0;i<8;i++){
-            pins[i]=pins[i+8];
-            emit pinVolChanged(static_cast<MicroCom::Pins>(i+108));
+    //如果使能端为低电平（有效）
+    if(Buffers245::getPinVoltage(MicroCom::BF5_g)==low){
+        //如果DIR为高电平，则数据从A(100~107,pins[0~7])->B(108~115,pins[8~15])
+        if(Buffers245::getPinVoltage(MicroCom::BF5_DIR)==high){
+            for(int i=0;i<8;i++){
+                setPinVoltage(static_cast<MicroCom::Pins>(i+8+BF5_START),pins[i]);
+            }
+            qDebug()<<"========74LS245 A->B works========";
+            qDebug()<<"B0="<<Buffers245::getPinVoltage(MicroCom::BF5_B0);
+            qDebug()<<"B1="<<Buffers245::getPinVoltage(MicroCom::BF5_B1);
+            qDebug()<<"B2="<<Buffers245::getPinVoltage(MicroCom::BF5_B2);
+            qDebug()<<"B3="<<Buffers245::getPinVoltage(MicroCom::BF5_B3);
+            qDebug()<<"B4="<<Buffers245::getPinVoltage(MicroCom::BF5_B4);
+            qDebug()<<"B5="<<Buffers245::getPinVoltage(MicroCom::BF5_B5);
+            qDebug()<<"B6="<<Buffers245::getPinVoltage(MicroCom::BF5_B6);
+            qDebug()<<"B7="<<Buffers245::getPinVoltage(MicroCom::BF5_B7);
         }
-        qDebug()<<"========74LS245 A->B works========";
-        qDebug()<<"B0="<<getPinVoltage(MicroCom::BF5_B0);
-        qDebug()<<"B1="<<getPinVoltage(MicroCom::BF5_B1);
-        qDebug()<<"B2="<<getPinVoltage(MicroCom::BF5_B2);
-        qDebug()<<"B3="<<getPinVoltage(MicroCom::BF5_B3);
-        qDebug()<<"B4="<<getPinVoltage(MicroCom::BF5_B4);
-        qDebug()<<"B5="<<getPinVoltage(MicroCom::BF5_B5);
-        qDebug()<<"B6="<<getPinVoltage(MicroCom::BF5_B6);
-        qDebug()<<"B7="<<getPinVoltage(MicroCom::BF5_B7);
+        //如果DIR为低电平，则数据从B(108~115,pins[8~15])端口->A(100~107,pins[0~7])端口
+        else{
+            for(int i=0;i<8;i++){
+                setPinVoltage(static_cast<MicroCom::Pins>(i+BF5_START),pins[i+8]);
+            }
+            qDebug()<<"========74LS245 B->A works========";
+            qDebug()<<"A0="<<Buffers245::getPinVoltage(MicroCom::BF5_A0);
+            qDebug()<<"A1="<<Buffers245::getPinVoltage(MicroCom::BF5_A1);
+            qDebug()<<"A2="<<Buffers245::getPinVoltage(MicroCom::BF5_A2);
+            qDebug()<<"A3="<<Buffers245::getPinVoltage(MicroCom::BF5_A3);
+            qDebug()<<"A4="<<Buffers245::getPinVoltage(MicroCom::BF5_A4);
+            qDebug()<<"A5="<<Buffers245::getPinVoltage(MicroCom::BF5_A5);
+            qDebug()<<"A6="<<Buffers245::getPinVoltage(MicroCom::BF5_A6);
+            qDebug()<<"A7="<<Buffers245::getPinVoltage(MicroCom::BF5_A7);
+        }
     }
+    //如果为高电平（非有效）
     else{
-        for(int i=0;i<8;i++){
-            pins[i+8]=pins[i];
-            emit pinVolChanged(static_cast<MicroCom::Pins>(i+100));
+        for(int i=0;i<16;i++){
+            setPinVoltage(static_cast<MicroCom::Pins>(i+BF5_START),inf);
         }
-        qDebug()<<"========74LS245 B->A works========";
-        qDebug()<<"A0="<<getPinVoltage(MicroCom::BF5_A0);
-        qDebug()<<"A1="<<getPinVoltage(MicroCom::BF5_A1);
-        qDebug()<<"A2="<<getPinVoltage(MicroCom::BF5_A2);
-        qDebug()<<"A3="<<getPinVoltage(MicroCom::BF5_A3);
-        qDebug()<<"A4="<<getPinVoltage(MicroCom::BF5_A4);
-        qDebug()<<"A5="<<getPinVoltage(MicroCom::BF5_A5);
-        qDebug()<<"A6="<<getPinVoltage(MicroCom::BF5_A6);
-        qDebug()<<"A7="<<getPinVoltage(MicroCom::BF5_A7);
+        qDebug()<<"========74LS245 使能端无效========";
+        qDebug()<<"=======所有引脚已被置为高阻=======";
+        qDebug()<<"A0="<<Buffers245::getPinVoltage(MicroCom::BF5_A0);
     }
-    //有没有必要还原输出引脚电平呢？
-    /*
-    for(int i=0;i<4;i++){
-        pins[i+pos]=pins[i];
-        emit pinVolChanged(static_cast<MicroCom::Pins>(i+pos+80));
-    }*/
 }

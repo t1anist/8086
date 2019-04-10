@@ -6,14 +6,16 @@ class Latchs : public Hardwares
 {
 private:
     Q_OBJECT
+    const int LA_START = 40;
     Voltage pins[LATCH_PIN_NUM];
     Counter<Latchs> c;
-    void setOutputVoltage();
 
 public:
     Latchs(QString latchName=nullptr);
     void setPinVoltage(MicroCom::Pins pin, Voltage value);
-    Voltage getPinVoltage(MicroCom::Pins pin);    
+    Voltage getPinVoltage(MicroCom::Pins pin);
+    void handlePinVolChanges(MicroCom::Pins pin, Voltage value);
+    void setOutputVoltage();
     static int howMany(){return Counter<Latchs>::howMany();}
 };
 

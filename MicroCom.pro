@@ -28,13 +28,21 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     hardwares.cpp \
-    cpus.cpp
+    cpus.cpp \
+    latchs.cpp \
+    decoders.cpp \
+    buffers244.cpp \
+    buffers245.cpp
 
 HEADERS += \
         mainwindow.h \
     datatype.h \
     hardwares.h \
-    cpus.h
+    cpus.h \
+    latchs.h \
+    decoders.h \
+    buffers244.h \
+    buffers245.h
 
 FORMS += \
         mainwindow.ui

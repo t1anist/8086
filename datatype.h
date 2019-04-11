@@ -5,12 +5,13 @@
 #define DATANUM 16
 
 /** 常量 **/
-const short SEC = 1000;
-const short LATCH_PIN_NUM = 18;
-const short CPU_PIN_NUM = 36;
-const short CPU_REG_NUM = 14;
-const short DECODER_PIN_NUM = 14;
-const short BUFFER_PIN_NUM = 18;
+const int SEC = 1000;
+const int LATCH_PIN_NUM = 18;
+const int CPU_PIN_NUM = 36;
+const int CPU_REG_NUM = 14;
+const int DECODER_PIN_NUM = 14;
+const int BUFFER_PIN_NUM = 18;
+const int PPI_PIN_NUM = 37;
 
 namespace MicroCom{
 
@@ -51,6 +52,7 @@ enum Pins{
     CP_RESET=31,
     CP_test=32,
     CP_CLK=33,
+
     /** Latch-Pins(40-57) **/
     LA_DI0=40,
     LA_DI1=41,
@@ -87,7 +89,7 @@ enum Pins{
     DE_y6=72,
     DE_y7=73,
 
-    /** Buffers244-Pins(80-97) **/
+    /** Buffer244-Pins(80-97) **/
     BF4_1I1=80,
     BF4_1I2=81,
     BF4_1I3=82,
@@ -107,7 +109,7 @@ enum Pins{
     BF4_Ga=96,
     BF4_Gb=97,
 
-    /** Buffers245-Pins(100-117) **/
+    /** Buffer245-Pins(100-117) **/
     BF5_A0=100,
     BF5_A1=101,
     BF5_A2=102,
@@ -125,8 +127,48 @@ enum Pins{
     BF5_B6=114,
     BF5_B7=115,
     BF5_DIR=116,
-    BF5_g=117
-};
+    BF5_g=117,
+
+    /** PPI-Pins(120-156) **/
+    PP_PA0=120,
+    PP_PA1=121,
+    PP_PA2=122,
+    PP_PA3=123,
+    PP_PA4=124,
+    PP_PA5=125,
+    PP_PA6=126,
+    PP_PA7=127,
+    PP_PB0=128,
+    PP_PB1=129,
+    PP_PB2=130,
+    PP_PB3=131,
+    PP_PB4=132,
+    PP_PB5=133,
+    PP_PB6=134,
+    PP_PB7=135,
+    PP_PC0=136,
+    PP_PC1=137,
+    PP_PC2=138,
+    PP_PC3=139,
+    PP_PC4=140,
+    PP_PC5=141,
+    PP_PC6=142,
+    PP_PC7=143,
+    PP_D0=144,
+    PP_D1=145,
+    PP_D2=146,
+    PP_D3=147,
+    PP_D4=148,
+    PP_D5=149,
+    PP_D6=150,
+    PP_D7=151,
+    PP_A0=152,
+    PP_A1=153,
+    PP_wr=154,
+    PP_rd=155,
+    PP_cs=156
+
+  };
 
 //寄存器号
 enum Regs{
@@ -165,8 +207,6 @@ enum ClockType{
     lowPulse=0,
     highPulse=1
 };
-
-}
 
 //引脚电平
 enum Voltage{

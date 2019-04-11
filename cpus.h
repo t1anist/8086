@@ -26,11 +26,12 @@ public:
     Voltage getPinVoltage(MicroCom::Pins pin);
     //set the ADDRESS BUS by addr
     void setAddrPinsVoltage(int addr);
+    void setDataPinsVoltage(unsigned short data);
 
     //get the Register's value
     unsigned short getRegValue(MicroCom::Regs reg);
     //get the Register's value by pos
-    Voltage getRegValue(MicroCom::Regs reg, short pos);
+    int getRegValue(MicroCom::Regs reg, int pos);
     //get the DATA BUS value
     unsigned short getDataValue(MicroCom::RegsLen len = MicroCom::dbyte);
 
@@ -38,12 +39,12 @@ public:
     void setRegValue(MicroCom::Regs reg, short value);
     void setRegUnsignedValue(MicroCom::Regs reg, unsigned short value);
     //set the Register's value by pos
-    void setRegValue(MicroCom::Regs reg, Voltage biValue, short pos);
+    void setRegValue(MicroCom::Regs reg, Voltage biValue, int pos);
 
     //read bus cycle
-    unsigned short readBusCycle(int phyAddr);
+    unsigned short readBusCycle(int phyAddr, bool isMemory = true);
     //write bus cycle
-    void writeBusCycle(int phyAddr, unsigned short value);
+    void writeBusCycle(int phyAddr, unsigned short value,  bool isMemory = true);
 
     //判断是否为奇数
     bool isOdd(int i);

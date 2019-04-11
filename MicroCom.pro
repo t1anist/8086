@@ -32,7 +32,8 @@ SOURCES += \
     latchs.cpp \
     decoders.cpp \
     buffers244.cpp \
-    buffers245.cpp
+    buffers245.cpp \
+    ppis.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,7 +43,8 @@ HEADERS += \
     latchs.h \
     decoders.h \
     buffers244.h \
-    buffers245.h
+    buffers245.h \
+    ppis.h
 
 FORMS += \
         mainwindow.ui

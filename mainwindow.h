@@ -8,6 +8,7 @@
 #include "latchs.h"
 #include "buffers245.h"
 #include "ppis.h"
+#include "decoders.h"
 
 namespace Ui {
 class MainWindow;
@@ -39,6 +40,8 @@ private:
     Latchs* la3;
     Buffers245* bf1;
     Buffers245* bf2;
+    Decoders* de1;
+    PPIs* pp1;
 
 };
 

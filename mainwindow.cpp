@@ -13,9 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
     la3 = new Latchs();
     bf1 = new Buffers245();
     bf2 = new Buffers245();
+    pp1 = new PPIs();
+    de1 = new Decoders();
 
     /** 将CPU的地址线与74LS373锁存器的输入端相连 **/
-   /*
+
     //将A0~A7与锁存器la1的DI0~DI7相连
     link(cp1,MicroCom::CP_AD0,la1,MicroCom::LA_DI0);
     link(cp1,MicroCom::CP_AD1,la1,MicroCom::LA_DI1);
@@ -45,9 +47,8 @@ MainWindow::MainWindow(QWidget *parent) :
     link(cp1,MicroCom::CP_AS19,la3,MicroCom::LA_DI3);
     link(cp1,MicroCom::CP_ALE,la3,MicroCom::LA_G);
     link(cp1,MicroCom::CP_bhe,la3,MicroCom::LA_oe);
-*/
+
     /** 将CPU与缓存器相连 **/
-    /*
     //将D0~D7与缓冲器bf1的A0~A7相连
     link(cp1,MicroCom::CP_AD0,bf1,MicroCom::BF5_A0);
     link(cp1,MicroCom::CP_AD1,bf1,MicroCom::BF5_A1);
@@ -71,8 +72,36 @@ MainWindow::MainWindow(QWidget *parent) :
     link(cp1,MicroCom::CP_den,bf2,MicroCom::BF5_g);
     link(cp1,MicroCom::CP_DTr,bf2,MicroCom::BF5_DIR);
 
-    cp1->readBusCycle(0xff);
-    cp1->writeBusCycle(0x00ff,28);*/
+    /** 将锁存器与译码器74LS138相连 **/
+    link(la1,MicroCom::LA_DO0,de1,MicroCom::DE_A);
+    link(la1,MicroCom::LA_DO1,pp1,MicroCom::PP_A0);
+    link(la1,MicroCom::LA_DO2,pp1,MicroCom::PP_A1);
+    link(la1,MicroCom::LA_DO3,de1,MicroCom::DE_G2b);
+    link(la1,MicroCom::LA_DO4,de1,MicroCom::DE_B);
+    link(la1,MicroCom::LA_DO5,de1,MicroCom::DE_C);
+    link(la1,MicroCom::LA_DO6,de1,MicroCom::DE_G1);
+    link(la1,MicroCom::LA_DO7,de1,MicroCom::DE_G2a);
+
+    /** 将译码器与8255A相连 **/
+    link(de1,MicroCom::DE_y6,pp1,MicroCom::PP_cs);
+    link(cp1,MicroCom::CP_wr,pp1,MicroCom::PP_wr);
+    link(cp1,MicroCom::CP_rd,pp1,MicroCom::PP_rd);
+
+    /** 将缓冲器与8255A相连 **/
+    link(bf1,MicroCom::BF5_B0,pp1,MicroCom::PP_D0);
+    link(bf1,MicroCom::BF5_B1,pp1,MicroCom::PP_D1);
+    link(bf1,MicroCom::BF5_B2,pp1,MicroCom::PP_D2);
+    link(bf1,MicroCom::BF5_B3,pp1,MicroCom::PP_D3);
+    link(bf1,MicroCom::BF5_B4,pp1,MicroCom::PP_D4);
+    link(bf1,MicroCom::BF5_B5,pp1,MicroCom::PP_D5);
+    link(bf1,MicroCom::BF5_B6,pp1,MicroCom::PP_D6);
+    link(bf1,MicroCom::BF5_B7,pp1,MicroCom::PP_D7);
+
+
+    cp1->writeBusCycle(0x0076,0x000f);
+    qDebug()<<pp1->getControlRegValue();
+    //cp1->readBusCycle(0xff);
+    //cp1->writeBusCycle(0x00ff,28);
  //   pp1 = new PPIs();
 
     /*

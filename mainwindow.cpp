@@ -6,13 +6,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     cp1 = new CPUs();
     la1 = new Latchs();
     la2 = new Latchs();
     la3 = new Latchs();
     bf1 = new Buffers245();
     bf2 = new Buffers245();
+
     /** 将CPU的地址线与74LS373锁存器的输入端相连 **/
+   /*
     //将A0~A7与锁存器la1的DI0~DI7相连
     link(cp1,MicroCom::CP_AD0,la1,MicroCom::LA_DI0);
     link(cp1,MicroCom::CP_AD1,la1,MicroCom::LA_DI1);
@@ -42,8 +45,9 @@ MainWindow::MainWindow(QWidget *parent) :
     link(cp1,MicroCom::CP_AS19,la3,MicroCom::LA_DI3);
     link(cp1,MicroCom::CP_ALE,la3,MicroCom::LA_G);
     link(cp1,MicroCom::CP_bhe,la3,MicroCom::LA_oe);
-
+*/
     /** 将CPU与缓存器相连 **/
+    /*
     //将D0~D7与缓冲器bf1的A0~A7相连
     link(cp1,MicroCom::CP_AD0,bf1,MicroCom::BF5_A0);
     link(cp1,MicroCom::CP_AD1,bf1,MicroCom::BF5_A1);
@@ -53,8 +57,8 @@ MainWindow::MainWindow(QWidget *parent) :
     link(cp1,MicroCom::CP_AD5,bf1,MicroCom::BF5_A5);
     link(cp1,MicroCom::CP_AD6,bf1,MicroCom::BF5_A6);
     link(cp1,MicroCom::CP_AD7,bf1,MicroCom::BF5_A7);
-    link(cp1,MicroCom::CP_den,bf1,MicroCom::BF5_DIR);
-    link(cp1,MicroCom::CP_DTr,bf1,MicroCom::BF5_g);
+    link(cp1,MicroCom::CP_den,bf1,MicroCom::BF5_g);
+    link(cp1,MicroCom::CP_DTr,bf1,MicroCom::BF5_DIR);
     //将D8~D15与缓冲器bf2的A0~A7相连
     link(cp1,MicroCom::CP_AD8,bf2,MicroCom::BF5_A0);
     link(cp1,MicroCom::CP_AD9,bf2,MicroCom::BF5_A1);
@@ -64,10 +68,19 @@ MainWindow::MainWindow(QWidget *parent) :
     link(cp1,MicroCom::CP_AD13,bf2,MicroCom::BF5_A5);
     link(cp1,MicroCom::CP_AD14,bf2,MicroCom::BF5_A6);
     link(cp1,MicroCom::CP_AD15,bf2,MicroCom::BF5_A7);
-    link(cp1,MicroCom::CP_den,bf2,MicroCom::BF5_DIR);
-    link(cp1,MicroCom::CP_DTr,bf2,MicroCom::BF5_g);
+    link(cp1,MicroCom::CP_den,bf2,MicroCom::BF5_g);
+    link(cp1,MicroCom::CP_DTr,bf2,MicroCom::BF5_DIR);
 
-    cp1->readBusCycle(0x00ff);
+    cp1->readBusCycle(0xff);
+    cp1->writeBusCycle(0x00ff,28);*/
+ //   pp1 = new PPIs();
+
+    /*
+    for(int i=0;i<8;i++){
+        pp1->setControlRegValue(high,i);
+    }*/
+  //  pp1->setControlRegValue(0xffff);
+   // qDebug()<<"pp1's control register's value is:"<<pp1->toTrueForm(pp1->getControlRegValue());
 
 
 }

@@ -7,6 +7,7 @@
 #include "cpus.h"
 #include "latchs.h"
 #include "buffers245.h"
+#include "ppis.h"
 
 namespace Ui {
 class MainWindow;

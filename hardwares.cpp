@@ -67,7 +67,7 @@ short Hardwares::toTrueForm(unsigned short value, MicroCom::RegsLen len){
  - Input：[value(complement form), MicroCom::RegsLen]
  - Return：a signed short number in true form
 *****************************************************/
-void Hardwares::toBinary(int denary, short binary[]){
+void Hardwares::toBinary(int denary, int binary[]){
     int j=0;
     while(denary)
     {
@@ -89,7 +89,7 @@ void Hardwares::toBinary(int denary, short binary[]){
  - Input：[value(complement form), MicroCom::RegsLen]
  - Return：a signed short number in true form
 *****************************************************/
-unsigned short Hardwares::toDenary(short binary[]){
+unsigned short Hardwares::toDenary(int binary[]){
     unsigned short rst = 0;
     for(int i=0;i<DATANUM;i++){
         if(binary[i]==1){

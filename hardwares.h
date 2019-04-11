@@ -23,8 +23,8 @@ public:
     unsigned short toCompForm(short value, MicroCom::RegsLen len = MicroCom::dbyte);
     //Complement Form to True Form 默认长度为16位
     short toTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
-    void toBinary(int denary, short binary[]);
-    unsigned short toDenary(short binary[]);
+    void toBinary(int denary, int binary[]);
+    unsigned short toDenary(int binary[]);
     //非阻塞延时函数
     void delaymsec(int msec);
 

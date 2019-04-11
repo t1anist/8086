@@ -77,9 +77,9 @@ enum Pins{
     DE_G1=60,
     DE_G2a=61,
     DE_G2b=62,
-    DE_C=63,
+    DE_A=63,
     DE_B=64,
-    DE_A=65,
+    DE_C=65,
     DE_y0=66,
     DE_y1=67,
     DE_y2=68,
@@ -170,6 +170,19 @@ enum Pins{
 
   };
 
+enum PPIWorkWay{
+    PP_AI,
+    PP_AO,
+    PP_BI,
+    PP_BO,
+    PP_CLI,
+    PP_CHI,
+    PP_CLO,
+    PP_CHO,
+    PP_CI,
+    PP_CO
+};
+
 //寄存器号
 enum Regs{
     ax=1,
@@ -207,7 +220,7 @@ enum ClockType{
     lowPulse=0,
     highPulse=1
 };
-
+}
 //引脚电平
 enum Voltage{
     high=5,

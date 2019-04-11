@@ -31,7 +31,7 @@ void Buffers245::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
                 for(int i=0;i<8;i++){
                     setPinVoltage(static_cast<MicroCom::Pins>(i+8+BF5_START),pins[i]);
                 }
-                qDebug()<<"========74LS245 A->B works========";
+                qDebug()<<"========"<<getHardwareName()<<"A->B works========";
                 qDebug()<<"B0="<<Buffers245::getPinVoltage(MicroCom::BF5_B0);
                 qDebug()<<"B1="<<Buffers245::getPinVoltage(MicroCom::BF5_B1);
                 qDebug()<<"B2="<<Buffers245::getPinVoltage(MicroCom::BF5_B2);
@@ -46,7 +46,7 @@ void Buffers245::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
                 for(int i=0;i<8;i++){
                     setPinVoltage(static_cast<MicroCom::Pins>(i+BF5_START),pins[i+8]);
                 }
-                qDebug()<<"========74LS245 B->A works========";
+                qDebug()<<"========"<<getHardwareName()<<"B->A works========";
                 qDebug()<<"A0="<<Buffers245::getPinVoltage(MicroCom::BF5_A0);
                 qDebug()<<"A1="<<Buffers245::getPinVoltage(MicroCom::BF5_A1);
                 qDebug()<<"A2="<<Buffers245::getPinVoltage(MicroCom::BF5_A2);
@@ -66,9 +66,8 @@ void Buffers245::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
             for(int i=0;i<16;i++){
                 setPinVoltage(static_cast<MicroCom::Pins>(i+BF5_START),inf);
             }
-            qDebug()<<"========74LS245 使能端无效========";
+            qDebug()<<"========"<<getHardwareName()<<"使能端无效========";
             qDebug()<<"=======所有引脚已被置为高阻=======";
-            qDebug()<<"A0="<<Buffers245::getPinVoltage(MicroCom::BF5_A0);
         }
     }
 }

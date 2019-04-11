@@ -25,7 +25,7 @@ void Latchs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
             for(int i=0;i<8;i++){
                 setPinVoltage(static_cast<MicroCom::Pins>(i+8+LA_START),pins[i]);
             }
-            qDebug()<<"=========Latch works========";
+            qDebug()<<"========="<<getHardwareName()<<"WORK=========";
             qDebug()<<"DO0="<<Latchs::getPinVoltage(MicroCom::LA_DO0);
             qDebug()<<"DO1="<<Latchs::getPinVoltage(MicroCom::LA_DO1);
             qDebug()<<"DO2="<<Latchs::getPinVoltage(MicroCom::LA_DO2);
@@ -34,7 +34,7 @@ void Latchs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
             qDebug()<<"DO5="<<Latchs::getPinVoltage(MicroCom::LA_DO5);
             qDebug()<<"DO6="<<Latchs::getPinVoltage(MicroCom::LA_DO6);
             qDebug()<<"DO7="<<Latchs::getPinVoltage(MicroCom::LA_DO7);
-            qDebug()<<"=========Latch ends=========";
+            qDebug()<<"========="<<getHardwareName()<<"END=========";
         }
     }
 }

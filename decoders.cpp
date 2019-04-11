@@ -37,16 +37,19 @@ void Decoders::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
             int rst = 0;
             //ABC（0~7）->相应的"y_"变为低电平
             for(int i=0;i<3;i++){
-                //C:pins[3],B:pins[4],A:pins[5]
+                qDebug()<<"pins["<<i+3<<"]="<<pins[i+3];
+                qDebug()<<"rst="<<rst;
+                //C:pins[5],B:pins[4],A:pins[3]
                 if(pins[i+3]==high){
-                    rst += 2^i;
+                    rst += 2^i;//这个函数写错了！^不能这么用！
+                    qDebug()<<"rst="<<rst;
                 }
             }
             //译码器正在执行译码功能
             //y0:pins[6]
             setPinVoltage(static_cast<MicroCom::Pins>(rst+6+DE_START),low);
             status = rst;//status的范围为0~7,表示译码器正在工作
-            qDebug()<<"=========Latch works========";
+            qDebug()<<"========="<<getHardwareName()<<"works========";
             qDebug()<<"y0="<<Decoders::getPinVoltage(MicroCom::DE_y0);
             qDebug()<<"y1="<<Decoders::getPinVoltage(MicroCom::DE_y1);
             qDebug()<<"y2="<<Decoders::getPinVoltage(MicroCom::DE_y2);
@@ -55,7 +58,7 @@ void Decoders::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
             qDebug()<<"y5="<<Decoders::getPinVoltage(MicroCom::DE_y5);
             qDebug()<<"y6="<<Decoders::getPinVoltage(MicroCom::DE_y6);
             qDebug()<<"y7="<<Decoders::getPinVoltage(MicroCom::DE_y7);
-            qDebug()<<"=========Latch ends=========";
+            qDebug()<<"========="<<getHardwareName()<<"ends=========";
         }
         //使能端非有效电平时
         else{

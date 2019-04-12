@@ -4,11 +4,12 @@
 #include <QMainWindow>
 #include <QDebug>
 #include <QTimer>
-#include "cpus.h"
-#include "latchs.h"
-#include "buffers245.h"
-#include "ppis.h"
-#include "decoders.h"
+#include "CPUs.h"
+#include "Latchs.h"
+#include "Buffers245.h"
+#include "PPIs.h"
+#include "Decoders.h"
+#include "LogicGate.h"
 
 namespace Ui {
 class MainWindow;
@@ -42,7 +43,7 @@ private:
     Buffers245* bf2;
     Decoders* de1;
     PPIs* pp1;
-
+    LogicGate* nand;
 };
 
 #endif // MAINWINDOW_H

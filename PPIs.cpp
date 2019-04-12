@@ -1,4 +1,4 @@
-#include "ppis.h"
+#include "PPIs.h"
 
 PPIs::PPIs(QString ppiName){
     controlReg = 0;
@@ -24,8 +24,8 @@ unsigned short PPIs::getDataValue(){
     unsigned short data = 0;
     qDebug()<<"=============="<<getHardwareName()<<"START GET DATA===============";
     for(int i=0;i<8;i++){
-        if(pins[PP_START+24+i]==high){
-            data += 2^i;
+        if(pins[i+24]==high){
+            data += 1<<i;
         }
     }
     qDebug()<<"DATA IS"<<data;
@@ -34,10 +34,9 @@ unsigned short PPIs::getDataValue(){
 }
 
 void PPIs::setOutputPinVoltage(MicroCom::PPIWorkWay wk, unsigned short value){
-    int binary[8];
+    int binary[8]={0};
     int num=8;
     int offset=0;
-    toBinary(value,binary);
     switch (wk) {
     case MicroCom::PP_CLO:
         num=4;
@@ -59,6 +58,8 @@ void PPIs::setOutputPinVoltage(MicroCom::PPIWorkWay wk, unsigned short value){
     default:
         return;
     }
+    toBinary(value,binary);
+
     for(int i=0;i<num;i++){
         if(binary[i]==1){
             setPinVoltage(static_cast<MicroCom::Pins>(i+PP_START+offset),high);
@@ -81,6 +82,19 @@ void PPIs::setInputPinVoltage(int offset){
 }
 
 
+/** 8255A的模型需要好好思考一下 **/
+//要给方式1、方式2留出实现的接口
+
+//常用方式
+/********************************************************
+ *  controlReg(B)   controlReg(D)        Mode           *
+ *  7 6 5 4 3 2 1                                       *
+ *  1 0 0 0 0 0 0       128         A0O+CHO+B0O+CLO     *
+ *  1 0 0 0 0 0 1       129         A0O+CHO+B0O+CLI     *
+ *  1 0 0 0 0 1 0       130         A0O+CHO+B0I+CLO     *
+ *       ...            ...                             *
+ *                                                      *
+ ********************************************************/
 
 //A口可以工作于三种方式中的任一种。
 //B口只能工作于方式0和方式1
@@ -92,7 +106,25 @@ void PPIs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
     if( pin==MicroCom::PP_rd || pin==MicroCom::PP_wr ){
         //如果使能端有效
         if(PPIs::getPinVoltage(MicroCom::PP_cs)==low){
-            qDebug()<<"=========="<<getHardwareName()<<"START =============";
+            //如果A口工作于方式2
+            /*if(getControlRegValue(6)==1){
+                if(getControlRegValue(2)==1){}   //如果B口工作于方式2
+                else if(getControlRegValue(2)==0{}  //如果B口工作于方式0
+              }
+              else if(getControlRegValue(6)==0 && getControlRegValue(5)==1){ //如果A口工作于方式1
+                if(getControlRegValue(2)==1){}   //如果B口工作于方式1
+                else if(getControlRegValue(2)==0{}  //如果B口工作于方式0
+              }
+              else if(getControlRegValue(5)==0){    //如果A口工作于方式0
+                if(getControlRegValue(2)==1){}   //如果B口工作于方式1
+                else if(getControlRegValue(2)==0{}  //如果B口工作于方式0
+              }
+              else{
+                如果A、B、C口均工作于方式0
+              }
+
+            */
+
             //读取数据总线上的数据
             unsigned short data = getDataValue();
             Voltage A0 = PPIs::getPinVoltage(MicroCom::PP_A0);
@@ -100,7 +132,8 @@ void PPIs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
 
             /** 向8255A写入数据 **/
             if(PPIs::getPinVoltage(MicroCom::PP_wr)==low){
-                qDebug()<<"============ WRITE MODE ==============";
+                qDebug()<<"=========="<<getHardwareName()<<"START =============";
+                qDebug()<<"================ WRITE MODE ================";
                 if(A0==low){
                     //选择A口
                     if(A1==low){
@@ -160,12 +193,13 @@ void PPIs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
                             }
                             for(int i=0;i<3;i++){
                                 if(getControlRegValue(i+1)==1){
-                                    pos += 2^i;
+                                    pos += 1<<i;
                                 }
                             }
                             setPinVoltage(static_cast<MicroCom::Pins>(pos+PP_START+16),value);
                         }
                     }
+                    qDebug()<<"=========="<<getHardwareName()<<"END =============";
                 }
                 else{
                     return;
@@ -199,7 +233,7 @@ void PPIs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
                 }
             }
 
-            //如果标志位为0，表示设置控制字寄存器
+            //如果wr和rd均无效
             else{
                 return;
             }
@@ -249,5 +283,12 @@ int PPIs::getControlRegValue(int pos){
     else{
         return 0;
     }
+}
+
+int PPIs::getWorkWay(){
+    int A = 0;
+    int B = 0;
+    A = getControlRegValue(6);
+
 }
 

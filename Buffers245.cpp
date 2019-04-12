@@ -1,4 +1,4 @@
-#include "buffers245.h"
+#include "Buffers245.h"
 
 Buffers245::Buffers245(QString bufferName){
     status = 0;

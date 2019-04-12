@@ -1,6 +1,6 @@
 #ifndef LATCHS_H
 #define LATCHS_H
-#include "hardwares.h"
+#include "Hardwares.h"
 
 class Latchs : public Hardwares
 {
@@ -9,6 +9,7 @@ private:
     const int LA_START = 40;
     Voltage pins[LATCH_PIN_NUM];
     Counter<Latchs> c;
+    int status;
 
 public:
     Latchs(QString latchName=nullptr);

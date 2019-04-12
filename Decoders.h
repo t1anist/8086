@@ -1,6 +1,6 @@
 #ifndef DECODERS_H
 #define DECODERS_H
-#include "hardwares.h"
+#include "Hardwares.h"
 
 /***
  * Class:Decoder(译码器74LS138)

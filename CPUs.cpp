@@ -1,4 +1,4 @@
-#include "cpus.h"
+#include "CPUs.h"
 
 CPUs::CPUs(QString cpuName){
     T=50;
@@ -301,7 +301,7 @@ void CPUs::writeBusCycle(int phyAddr, unsigned short value, bool isMemory){
     setPinVoltage(MicroCom::CP_bhe,high);
     delaymsec(T);
     qDebug()<<"============T2 HALF=============";
-    setPinVoltage(MicroCom::CP_wr,low);
+    setPinVoltage(MicroCom::CP_wr,low); //触发8255A、存储器工作
     qDebug()<<"============T2 END=============";
 
     /** ==============T3 START================**/
@@ -316,7 +316,7 @@ void CPUs::writeBusCycle(int phyAddr, unsigned short value, bool isMemory){
     delaymsec(2*T);
     qDebug()<<"============T4 START============";
     for(int i=0;i<ADDRNUM;i++){
-        pins[i]=inf;
+        setPinVoltage(static_cast<MicroCom::Pins>(i),inf);
     }
     setPinVoltage(MicroCom::CP_wr,high);
     setPinVoltage(MicroCom::CP_den,high);

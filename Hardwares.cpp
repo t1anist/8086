@@ -1,4 +1,4 @@
-#include "hardwares.h"
+#include "Hardwares.h"
 
 Hardwares::Hardwares(QWidget *parent) : QWidget(parent)
 {

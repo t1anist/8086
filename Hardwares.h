@@ -5,7 +5,7 @@
 #include <QTime>
 #include <QDebug>
 #include <QCoreApplication>
-#include "datatype.h"
+#include "DataType.h"
 
 class Hardwares : public QWidget
 {

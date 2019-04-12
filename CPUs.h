@@ -1,7 +1,7 @@
 #ifndef CPUS_H
 #define CPUS_H
-#include "hardwares.h"
-#include "datatype.h"
+#include "Hardwares.h"
+#include "DataType.h"
 #include <QDebug>
 #include <QTimer>
 

@@ -27,24 +27,26 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    hardwares.cpp \
-    cpus.cpp \
-    latchs.cpp \
-    decoders.cpp \
-    buffers244.cpp \
-    buffers245.cpp \
-    ppis.cpp
+    LogicGate.cpp \
+    CPUs.cpp \
+    Latchs.cpp \
+    PPIs.cpp \
+    Decoders.cpp \
+    Hardwares.cpp \
+    Buffers244.cpp \
+    Buffers245.cpp
 
 HEADERS += \
         mainwindow.h \
-    datatype.h \
-    hardwares.h \
-    cpus.h \
-    latchs.h \
-    decoders.h \
-    buffers244.h \
-    buffers245.h \
-    ppis.h
+    LogicGate.h \
+    CPUs.h \
+    Latchs.h \
+    PPIs.h \
+    Decoders.h \
+    DataType.h \
+    Hardwares.h \
+    Buffers244.h \
+    Buffers245.h
 
 FORMS += \
         mainwindow.ui

@@ -1,6 +1,6 @@
 #ifndef BUFFERS_H
 #define BUFFERS_H
-#include "hardwares.h"
+#include "Hardwares.h"
 
 class Buffers244 : public Hardwares
 {

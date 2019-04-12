@@ -11,7 +11,8 @@ const int CPU_PIN_NUM = 36;
 const int CPU_REG_NUM = 14;
 const int DECODER_PIN_NUM = 14;
 const int BUFFER_PIN_NUM = 18;
-const int PPI_PIN_NUM = 37;
+const int PPI_PIN_NUM = 37;     //8255A最大引脚数
+const int LGATE_PIN_NUM = 3;    //逻辑门最大的引脚数
 
 namespace MicroCom{
 
@@ -166,7 +167,13 @@ enum Pins{
     PP_A1=153,
     PP_wr=154,
     PP_rd=155,
-    PP_cs=156
+    PP_cs=156,
+
+    /** Logic Gates **/
+    LG_I1 = 200,    //输入1
+    LG_I2 = 201,    //输入2
+    LG_I3 = 202,    //输入3
+    LG_O = 203      //输出
 
   };
 
@@ -220,6 +227,16 @@ enum ClockType{
     lowPulse=0,
     highPulse=1
 };
+
+enum GateType{
+    AND=0,
+    OR=1,
+    NOT=2,
+    NAND=3,
+    NOR=4,  //或非门
+    XOR=5   //异或门
+};
+
 }
 //引脚电平
 enum Voltage{

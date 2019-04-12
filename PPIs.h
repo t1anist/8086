@@ -1,6 +1,6 @@
 #ifndef PPI8255A_H
 #define PPI8255A_H
-#include "hardwares.h"
+#include "Hardwares.h"
 
 class PPIs : public Hardwares
 {
@@ -29,6 +29,8 @@ public:
 
     void setOutputPinVoltage(MicroCom::PPIWorkWay wk, unsigned short value);
     void setInputPinVoltage(int offset);
+
+    int getWorkWay();
 
     //计数器
     static int howMany(){return Counter<PPIs>::howMany();}

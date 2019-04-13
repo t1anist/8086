@@ -28,7 +28,7 @@ Voltage Decoders::getPinVoltage(MicroCom::Pins pin){
 //处理上游引脚电平改变
 void Decoders::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
     pins[pin-DE_START]=value;
-    //首先只有出发使能端才会有效
+    //首先只有触发使能端才会有效
     if(pin==MicroCom::DE_G1 || pin==MicroCom::DE_G2a || pin==MicroCom::DE_G2b){
         //只有使能端均有效时才会触发译码功能
         if(Decoders::getPinVoltage(MicroCom::DE_G1)==high
@@ -39,8 +39,11 @@ void Decoders::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
             for(int i=0;i<3;i++){
                 //C:pins[5],B:pins[4],A:pins[3]
                 if(pins[i+3]==high){
-                    rst += 1<<i;//这个函数写错了！^不能这么用！
+                    rst += 1<<i;
                 }
+            }
+            for(int i=0;i<8;i++){
+                setPinVoltage(static_cast<MicroCom::Pins>(i+6+DE_START),high);
             }
             //译码器正在执行译码功能
             setPinVoltage(static_cast<MicroCom::Pins>(rst+6+DE_START),low);

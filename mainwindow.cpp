@@ -122,9 +122,12 @@ MainWindow::MainWindow(QWidget *parent) :
     link(bf1,MicroCom::BF5_A6,cp1,MicroCom::CP_AD6);
     link(bf1,MicroCom::BF5_A7,cp1,MicroCom::CP_AD7);
 
-    cp1->writeBusCycle(0x0076,0x000f);
+    cp1->writeBusCycle(0x0076,0x93);
     qDebug()<<pp1->getControlRegValue();
-    cp1->readBusCycle(0x0076);
+    cp1->readBusCycle(0x0072);
+    cp1->readBusCycle(0x0070);
+    cp1->readBusCycle(0x0074);
+
 }
 
 MainWindow::~MainWindow()

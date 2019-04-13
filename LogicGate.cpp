@@ -78,6 +78,8 @@ void LogicGate::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
     else{
         LogicGate::setPinVoltage(MicroCom::LG_O,low);
     }
+    pins[0]=inf;
+    pins[1]=inf;
     qDebug()<<"==========="<<getHardwareName()<<"END===========";
     return;
 }

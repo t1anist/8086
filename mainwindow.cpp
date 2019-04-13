@@ -8,14 +8,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     cp1 = new CPUs("8086CPU");
+    //三个锁存器
     la1 = new Latchs("74LS373_1");
     la2 = new Latchs("74LS373_2");
     la3 = new Latchs("74LS373_3");
+    //两个缓冲器
     bf1 = new Buffers245("74LS245_1");
     bf2 = new Buffers245("74LS245_2");
+    //8255A可编程并行IO接口
     pp1 = new PPIs("8255A");
+    //74LS138译码器
     de1 = new Decoders("74LS138");
-    nand = new LogicGate(MicroCom::NOR,"Not-And-Gate");
+    //与非门
+    nand = new LogicGate(MicroCom::NOR,"NAND Gate");
 
     /** 将CPU的地址线与74LS373锁存器的输入端相连 **/
 
@@ -46,7 +51,6 @@ MainWindow::MainWindow(QWidget *parent) :
     link(cp1,MicroCom::CP_AS19,la3,MicroCom::LA_DI3);
     link(cp1,MicroCom::CP_bhe,la3,MicroCom::LA_DI4);
     link(cp1,MicroCom::CP_ALE,la3,MicroCom::LA_G);
-
 
     /** 将CPU与缓存器相连 **/
     //将D0~D7与缓冲器bf1的A0~A7相连
@@ -90,6 +94,7 @@ MainWindow::MainWindow(QWidget *parent) :
     link(cp1,MicroCom::CP_rd,pp1,MicroCom::PP_rd);
 
     /** 将缓冲器与8255A相连 **/
+    //数据输出
     link(bf1,MicroCom::BF5_B0,pp1,MicroCom::PP_D0);
     link(bf1,MicroCom::BF5_B1,pp1,MicroCom::PP_D1);
     link(bf1,MicroCom::BF5_B2,pp1,MicroCom::PP_D2);
@@ -98,40 +103,61 @@ MainWindow::MainWindow(QWidget *parent) :
     link(bf1,MicroCom::BF5_B5,pp1,MicroCom::PP_D5);
     link(bf1,MicroCom::BF5_B6,pp1,MicroCom::PP_D6);
     link(bf1,MicroCom::BF5_B7,pp1,MicroCom::PP_D7);
+    //数据输入
+    link(pp1,MicroCom::PP_D0,bf1,MicroCom::BF5_B0);
+    link(pp1,MicroCom::PP_D1,bf1,MicroCom::BF5_B1);
+    link(pp1,MicroCom::PP_D2,bf1,MicroCom::BF5_B2);
+    link(pp1,MicroCom::PP_D3,bf1,MicroCom::BF5_B3);
+    link(pp1,MicroCom::PP_D4,bf1,MicroCom::BF5_B4);
+    link(pp1,MicroCom::PP_D5,bf1,MicroCom::BF5_B5);
+    link(pp1,MicroCom::PP_D6,bf1,MicroCom::BF5_B6);
+    link(pp1,MicroCom::PP_D7,bf1,MicroCom::BF5_B7);
 
+    link(bf1,MicroCom::BF5_A0,cp1,MicroCom::CP_AD0);
+    link(bf1,MicroCom::BF5_A1,cp1,MicroCom::CP_AD1);
+    link(bf1,MicroCom::BF5_A2,cp1,MicroCom::CP_AD2);
+    link(bf1,MicroCom::BF5_A3,cp1,MicroCom::CP_AD3);
+    link(bf1,MicroCom::BF5_A4,cp1,MicroCom::CP_AD4);
+    link(bf1,MicroCom::BF5_A5,cp1,MicroCom::CP_AD5);
+    link(bf1,MicroCom::BF5_A6,cp1,MicroCom::CP_AD6);
+    link(bf1,MicroCom::BF5_A7,cp1,MicroCom::CP_AD7);
 
     cp1->writeBusCycle(0x0076,0x000f);
     qDebug()<<pp1->getControlRegValue();
-    //cp1->readBusCycle(0xff);
-    //cp1->writeBusCycle(0x00ff,28);
- //   pp1 = new PPIs();
-
-    /*
-    for(int i=0;i<8;i++){
-        pp1->setControlRegValue(high,i);
-    }*/
-  //  pp1->setControlRegValue(0xffff);
-   // qDebug()<<"pp1's control register's value is:"<<pp1->toTrueForm(pp1->getControlRegValue());
-
-
+    cp1->readBusCycle(0x0076);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
     ui=nullptr;
+
     delete cp1;
     cp1=nullptr;
+
     delete la1;
     la1=nullptr;
+
     delete la2;
     la2=nullptr;
+
     delete la3;
     la3=nullptr;
+
     delete bf1;
     bf1=nullptr;
+
     delete bf2;
     bf2=nullptr;
+
+    delete pp1;
+    pp1=nullptr;
+
+    delete de1;
+    de1=nullptr;
+
+    delete nand;
+    nand=nullptr;
 }
 
 //mov立即数寻址

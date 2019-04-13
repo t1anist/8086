@@ -25,15 +25,14 @@ public:
     //get the pin's voltage
     Voltage getPinVoltage(MicroCom::Pins pin);
     //set the ADDRESS BUS by addr
-    void setAddrPinsVoltage(int addr);
-    void setDataPinsVoltage(unsigned short data);
+    void setAddrDataPinsVoltage(int addr,bool isAddr=true);
 
     //get the Register's value
     unsigned short getRegValue(MicroCom::Regs reg);
     //get the Register's value by pos
     int getRegValue(MicroCom::Regs reg, int pos);
     //get the DATA BUS value
-    unsigned short getDataValue(MicroCom::RegsLen len = MicroCom::dbyte);
+    unsigned short getDataValue();
 
     //set the Register's value
     void setRegValue(MicroCom::Regs reg, short value);

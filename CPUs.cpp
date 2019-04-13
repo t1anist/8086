@@ -42,15 +42,18 @@ unsigned short CPUs::getRegValue(MicroCom::Regs reg){
  - Input：寄存器的长度（8位or16位）
  - Return：数据线表示的值（类型：unsigned short）
 *****************************************************/
-unsigned short CPUs::getDataValue(MicroCom::RegsLen len){
-    qDebug()<<"START GET DATA";
+unsigned short CPUs::getDataValue(){
     unsigned short rst=0;
-    int value[DATANUM] ={0};
-    int numlen = static_cast<int>(len);
-    for(int i=0;i<numlen;i++){
-        (pins[i]==low)?value[i]=0:value[i]=1;
+    int len = 8;
+    qDebug()<<"START GET DATA";
+    if(pins[MicroCom::CP_bhe]==low){
+        len = 16;
     }
-    rst = toDenary(value);
+    for(int i=0;i<len;i++){
+        if(pins[i]==high){
+            rst += 1<<i;
+        }
+    }
     qDebug()<<"DATA IS"<<rst;
     return rst;
 }
@@ -163,27 +166,20 @@ void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, int pos){
  - Input：20位地址变量（addr）
  - Return：
 *****************************************************/
-void CPUs::setAddrPinsVoltage(int addr){
-    int binary[ADDRNUM] = {0};
-    toBinary(addr,binary);
-    for(int i=0;i<ADDRNUM;i++){
-        (binary[i])?pins[i]=high:pins[i]=low;
-        emit pinVolChanged(static_cast<MicroCom::Pins>(i));
+void CPUs::setAddrDataPinsVoltage(int addr, bool isAddr){
+    int pos = 1;
+    int len = ADDRNUM;
+    if(isAddr==false){
+        len = DATANUM;
     }
-    delaymsec(T);
-}
-
-/****************************************************
- - Function：写入数据线
- - Input：数据值（unsigned short）
- - Return：
-*****************************************************/
-void CPUs::setDataPinsVoltage(unsigned short data){
-    int binary[DATANUM] = {0};
-    toBinary(data,binary);
-    for(int i=0;i<DATANUM;i++){
-        (binary[i])?pins[i]=high:pins[i]=low;
-        emit pinVolChanged(static_cast<MicroCom::Pins>(i));
+    for(int i=0;i<len;i++){
+        if((addr & pos)>0){
+            setPinVoltage(static_cast<MicroCom::Pins>(i),high);
+        }
+        else{
+            setPinVoltage(static_cast<MicroCom::Pins>(i),low);
+        }
+        pos <<= 1;
     }
     delaymsec(T);
 }
@@ -211,7 +207,7 @@ unsigned short CPUs::readBusCycle(int phyAddr, bool isMemory){
     else{
         setPinVoltage(MicroCom::CP_Mio,low);
     }
-    setAddrPinsVoltage(address);
+    setAddrDataPinsVoltage(address);
     setPinVoltage(MicroCom::CP_bhe,low);
     setPinVoltage(MicroCom::CP_ALE,high);
     setPinVoltage(MicroCom::CP_DTr,low);
@@ -253,6 +249,7 @@ unsigned short CPUs::readBusCycle(int phyAddr, bool isMemory){
     }
     setPinVoltage(MicroCom::CP_rd,high);
     setPinVoltage(MicroCom::CP_den,high);
+    setPinVoltage(MicroCom::CP_Mio,inf);
     qDebug()<<"============T4 END=============";
     return data;
 }
@@ -280,7 +277,7 @@ void CPUs::writeBusCycle(int phyAddr, unsigned short value, bool isMemory){
     else{
         setPinVoltage(MicroCom::CP_Mio,low);
     }
-    setAddrPinsVoltage(address);
+    setAddrDataPinsVoltage(address);
     setPinVoltage(MicroCom::CP_bhe,low);
     setPinVoltage(MicroCom::CP_ALE,high);
     setPinVoltage(MicroCom::CP_DTr,high);
@@ -295,7 +292,7 @@ void CPUs::writeBusCycle(int phyAddr, unsigned short value, bool isMemory){
     //  3.wr  在后半周期变为低电平，表示允许写入（rd变低意味着数据从缓冲器到达存储器或IO端口）
     //  4.bhe 变为高电平
     delaymsec(2*T);
-    setDataPinsVoltage(value);
+    setAddrDataPinsVoltage(value,false);
     qDebug()<<"============T2 START=============";
     setPinVoltage(MicroCom::CP_den,low);
     setPinVoltage(MicroCom::CP_bhe,high);
@@ -320,6 +317,7 @@ void CPUs::writeBusCycle(int phyAddr, unsigned short value, bool isMemory){
     }
     setPinVoltage(MicroCom::CP_wr,high);
     setPinVoltage(MicroCom::CP_den,high);
+    setPinVoltage(MicroCom::CP_Mio,inf);
     qDebug()<<"============T4 END=============";
     return;
 }

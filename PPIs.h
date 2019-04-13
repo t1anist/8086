@@ -27,12 +27,9 @@ public:
     int getControlRegValue(int pos);
     unsigned short getDataValue();
 
-    void setOutputPinVoltage(int offset, int num=8);
-    void setInputPinVoltage(int offset);
+    void setPortPinVoltage(bool isRead, int offset, int len=8);
 
-    void writeMode();
-    void readMode();
-
+    void handleIoMode(bool isRead, int port);
     MicroCom::PPIWorkWay getWorkWay();
 
     //计数器

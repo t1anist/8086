@@ -43,7 +43,6 @@ void Decoders::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
                 }
             }
             //译码器正在执行译码功能
-            //y0:pins[6]
             setPinVoltage(static_cast<MicroCom::Pins>(rst+6+DE_START),low);
             status = rst;//status的范围为0~7,表示译码器正在工作
             qDebug()<<"========="<<getHardwareName()<<"WORK========";

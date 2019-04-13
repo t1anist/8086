@@ -172,7 +172,6 @@ enum Pins{
     /** Logic Gates **/
     LG_I1 = 200,    //输入1
     LG_I2 = 201,    //输入2
-    LG_I3 = 202,    //输入3
     LG_O = 203      //输出
 
 };
@@ -232,7 +231,9 @@ enum GateType{
     NOR=4,  //或非门
     XOR=5   //异或门
 };
+
 }
+
 //引脚电平
 enum Voltage{
     high=5,

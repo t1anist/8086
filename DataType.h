@@ -175,19 +175,15 @@ enum Pins{
     LG_I3 = 202,    //输入3
     LG_O = 203      //输出
 
-  };
+};
 
 enum PPIWorkWay{
-    PP_AI,
-    PP_AO,
-    PP_BI,
-    PP_BO,
-    PP_CLI,
-    PP_CHI,
-    PP_CLO,
-    PP_CHO,
-    PP_CI,
-    PP_CO
+    PPI_A0B0C0=0,
+    PPI_A1B0C0=1,
+    PPI_A2B0C0=2,
+    PPI_A0B1C0=3,
+    PPI_A1B1C0=4,
+    PPI_A2B1C0=5,
 };
 
 //寄存器号
@@ -236,7 +232,6 @@ enum GateType{
     NOR=4,  //或非门
     XOR=5   //异或门
 };
-
 }
 //引脚电平
 enum Voltage{

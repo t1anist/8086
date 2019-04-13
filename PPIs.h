@@ -27,10 +27,13 @@ public:
     int getControlRegValue(int pos);
     unsigned short getDataValue();
 
-    void setOutputPinVoltage(MicroCom::PPIWorkWay wk, unsigned short value);
+    void setOutputPinVoltage(int offset, int num=8);
     void setInputPinVoltage(int offset);
 
-    int getWorkWay();
+    void writeMode();
+    void readMode();
+
+    MicroCom::PPIWorkWay getWorkWay();
 
     //计数器
     static int howMany(){return Counter<PPIs>::howMany();}

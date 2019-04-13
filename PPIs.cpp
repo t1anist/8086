@@ -33,40 +33,9 @@ unsigned short PPIs::getDataValue(){
     return data;
 }
 
-void PPIs::setOutputPinVoltage(MicroCom::PPIWorkWay wk, unsigned short value){
-    int binary[8]={0};
-    int num=8;
-    int offset=0;
-    switch (wk) {
-    case MicroCom::PP_CLO:
-        num=4;
-        offset=16;
-        break;
-    case MicroCom::PP_CHO:
-        num=4;
-        offset=20;
-        break;
-    case MicroCom::PP_CO:
-        offset=16;
-        break;
-    case MicroCom::PP_AO:
-        offset=0;
-        break;
-    case MicroCom::PP_BO:
-        offset=8;
-        break;
-    default:
-        return;
-    }
-    toBinary(value,binary);
-
-    for(int i=0;i<num;i++){
-        if(binary[i]==1){
-            setPinVoltage(static_cast<MicroCom::Pins>(i+PP_START+offset),high);
-        }
-        else{
-            setPinVoltage(static_cast<MicroCom::Pins>(i+PP_START+offset),low);
-        }
+void PPIs::setOutputPinVoltage(int offset, int len){
+    for(int i=0;i<len;i++){
+        setPinVoltage(static_cast<MicroCom::Pins>(i+offset+PP_START),pins[i+24]);
     }
 }
 
@@ -81,170 +50,157 @@ void PPIs::setInputPinVoltage(int offset){
     }
 }
 
-
-/** 8255A的模型需要好好思考一下 **/
-//要给方式1、方式2留出实现的接口
-
-//常用方式
-/********************************************************
- *  controlReg(B)   controlReg(D)        Mode           *
- *  7 6 5 4 3 2 1                                       *
- *  1 0 0 0 0 0 0       128         A0O+CHO+B0O+CLO     *
- *  1 0 0 0 0 0 1       129         A0O+CHO+B0O+CLI     *
- *  1 0 0 0 0 1 0       130         A0O+CHO+B0I+CLO     *
- *       ...            ...                             *
- *                                                      *
- ********************************************************/
-
-//A口可以工作于三种方式中的任一种。
-//B口只能工作于方式0和方式1
-//C口只能工作于方式0
-//读取控制字寄存器无意义
+//要给方式1、方式2留出实现的接口（√）
 void PPIs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
     pins[pin-PP_START]=value;
     //如果要进行读写
     if( pin==MicroCom::PP_rd || pin==MicroCom::PP_wr ){
         //如果使能端有效
         if(PPIs::getPinVoltage(MicroCom::PP_cs)==low){
-            //如果A口工作于方式2
-            /*if(getControlRegValue(6)==1){
-                if(getControlRegValue(2)==1){}   //如果B口工作于方式2
-                else if(getControlRegValue(2)==0{}  //如果B口工作于方式0
-              }
-              else if(getControlRegValue(6)==0 && getControlRegValue(5)==1){ //如果A口工作于方式1
-                if(getControlRegValue(2)==1){}   //如果B口工作于方式1
-                else if(getControlRegValue(2)==0{}  //如果B口工作于方式0
-              }
-              else if(getControlRegValue(5)==0){    //如果A口工作于方式0
-                if(getControlRegValue(2)==1){}   //如果B口工作于方式1
-                else if(getControlRegValue(2)==0{}  //如果B口工作于方式0
-              }
-              else{
-                如果A、B、C口均工作于方式0
-              }
-
-            */
-
-            //读取数据总线上的数据
-            unsigned short data = getDataValue();
-            Voltage A0 = PPIs::getPinVoltage(MicroCom::PP_A0);
-            Voltage A1 = PPIs::getPinVoltage(MicroCom::PP_A1);
-
-            /** 向8255A写入数据 **/
-            if(PPIs::getPinVoltage(MicroCom::PP_wr)==low){
-                qDebug()<<"=========="<<getHardwareName()<<"START =============";
-                qDebug()<<"================ WRITE MODE ================";
-                if(A0==low){
-                    //选择A口
-                    if(A1==low){
-                        qDebug()<<"======== WRITE INTO PORT A ===========";
-                        if(getControlRegValue(4)==0){
-                           setOutputPinVoltage(MicroCom::PP_AO,data);
-                        }
-                        else{
-                            qDebug()<<"ERROR: PORT A IN WRONG WORK WAY";
-                        }
-
-                    }
-                    //选择C口
-                    else if(A1==high){
-                        qDebug()<<"======== WRITE INTO PORT C ===========";
-                        if(getControlRegValue(3)==0){
-                            if(getControlRegValue(0)==0){
-                                setOutputPinVoltage(MicroCom::PP_CO,data);
-                            }
-                            else if(getControlRegValue(0)==1){
-                                setOutputPinVoltage(MicroCom::PP_CHO,data);
-                            }
-                        }
-                        else if(getControlRegValue(0)==0){
-                            setOutputPinVoltage(MicroCom::PP_CLI,data);
-                        }
-                        else{
-                            qDebug()<<"ERROR: PORT C IN WRONG WORK WAY";
-                        }
-                    }
+            switch (getWorkWay()) {
+            case MicroCom::PPI_A2B1C0:
+                //A(方式2) B(方式1) C(方式0)
+                break;
+            case MicroCom::PPI_A2B0C0:
+                //A(方式2) B(方式0) C(方式0)
+                break;
+            case MicroCom::PPI_A1B1C0:
+                //A(方式1) B(方式1) C(方式0)
+                break;
+            case MicroCom::PPI_A1B0C0:
+                //A(方式1) B(方式0) C(方式0)
+                break;
+            case MicroCom::PPI_A0B1C0:
+                //A(方式0) B(方式1) C(方式0)
+                break;
+            default:
+                if(PPIs::getPinVoltage(MicroCom::PP_cs)==low){
+                    writeMode();
                 }
-                else if(A0==high){
-                    //选择B口
-                    if(A1==low){
-                        qDebug()<<"======== WRITE INTO PORT B ===========";
-                        if(getControlRegValue(1)==0){
-                           setOutputPinVoltage(MicroCom::PP_BO,data);
-                        }
-                        else{
-                            qDebug()<<"ERROR: PORT B IN WRONG WORK WAY";
-                        }
-                    }
-                    //选择控制字寄存器口
-                    else if(A1==high){
-                        qDebug()<<"======== WRITE INTO PORT CONTROL ===========";
-                        //将数据写入控制字寄存器
-                        setControlRegValue(data);
-                        //如果控制字寄存器的标志位为0，则表示要执行置位/复位操作
-                        if(getControlRegValue(7)==0){
-                            Voltage value = inf;
-                            int pos = 0;
-                            if(getControlRegValue(0)==1){
-                                value = high;
-                            }
-                            else{
-                                value = low;
-                            }
-                            for(int i=0;i<3;i++){
-                                if(getControlRegValue(i+1)==1){
-                                    pos += 1<<i;
-                                }
-                            }
-                            setPinVoltage(static_cast<MicroCom::Pins>(pos+PP_START+16),value);
-                        }
-                    }
-                    qDebug()<<"=========="<<getHardwareName()<<"END =============";
+                else if(PPIs::getPinVoltage(MicroCom::PP_rd)==low){
+                    readMode();
                 }
-                else{
-                    return;
-                }
+                break;
             }
-
-            /** 从8255A读取数据 **/
-            else if(PPIs::getPinVoltage(MicroCom::PP_rd)==low){
-                qDebug()<<"============ READ MODE ==============";
-                if(A0==low){
-                    //从A端口读取数据
-                    if(A1==low){
-                        qDebug()<<"======== READ FROM PORT A ===========";
-                        setInputPinVoltage(0);
-                    }
-                    //从C端口读取数据
-                    else if(A1==high){
-                        qDebug()<<"======== READ FROM PORT C ===========";
-                        setInputPinVoltage(16);
-                    }
-                }
-                else if(A0==high){
-                    //从B端口读取数据
-                    if(A1==low){
-                        qDebug()<<"======== READ FROM PORT B ===========";
-                        setInputPinVoltage(8);
-                    }
-                }
-                else{
-                    return;
-                }
-            }
-
-            //如果wr和rd均无效
-            else{
-                return;
-            }
-        }
-        //如果使能端无效
-        else{
-            return;
         }
     }
     return;
 }
+
+
+void PPIs::readMode(){
+    int port = 0;
+    Voltage A0 = PPIs::getPinVoltage(MicroCom::PP_A0);
+    Voltage A1 = PPIs::getPinVoltage(MicroCom::PP_A1);
+    if(A0==high)  port += 1;
+    if(A1==high)  port += 2;
+    qDebug()<<"=========="<<getHardwareName()<<"START =============";
+    qDebug()<<"================ READ MODE ================";
+    switch(port){
+    case 0: //port A
+        if(getControlRegValue(4)==0){
+            qDebug()<<"======= START READ FROM PORT A =========";
+            setOutputPinVoltage(0);
+            qDebug()<<"======= READ FROM PORT A SUCCESS =========";
+        }
+        else{
+            qDebug()<<"ERROR: PORT A IN WRONG WORK WAY";
+        }
+        break;
+
+    else if(PPIs::getPinVoltage(MicroCom::PP_rd)==low){
+        qDebug()<<"============ READ MODE ==============";
+        if(A0==low){
+            //从A端口读取数据
+            if(A1==low){
+                qDebug()<<"======== READ FROM PORT A ===========";
+                setInputPinVoltage(0);
+            }
+            //从C端口读取数据
+            else if(A1==high){
+                qDebug()<<"======== READ FROM PORT C ===========";
+                setInputPinVoltage(16);
+            }
+        }
+        else if(A0==high){
+            //从B端口读取数据
+            if(A1==low){
+                qDebug()<<"======== READ FROM PORT B ===========";
+                setInputPinVoltage(8);
+            }
+        }
+        else{
+            return;
+        }
+    }
+
+    //如果wr和rd均无效
+    else{
+        return;
+    }
+}
+
+
+/** 向8255A写入数据 **/
+void PPIs::writeMode(){
+    int port = 0;
+    Voltage A0 = PPIs::getPinVoltage(MicroCom::PP_A0);
+    Voltage A1 = PPIs::getPinVoltage(MicroCom::PP_A1);
+    if(A0==high)  port += 1;
+    if(A1==high)  port += 2;
+    qDebug()<<"=========="<<getHardwareName()<<"START =============";
+    qDebug()<<"================ WRITE MODE ================";
+    switch(port){
+    case 0: //port A
+        qDebug()<<"======= START WRITE INTO PORT A =========";
+        if(getControlRegValue(4)==0){
+            setOutputPinVoltage(0);
+        }
+        else{
+            qDebug()<<"ERROR: PORT A IN WRONG WORK WAY";
+        }
+        break;
+    case 1: //port B
+        qDebug()<<"======= START WRITE INTO PORT B =========";
+        if(getControlRegValue(1)==0){
+            setOutputPinVoltage(8);
+        }
+        else{
+            qDebug()<<"ERROR: PORT B IN WRONG WORK WAY";
+        }
+        break;
+    case 2: //port C
+        qDebug()<<"======= START WRITE INTO PORT C =========";
+        if(getControlRegValue(0)==0){   //CL
+            setOutputPinVoltage(16,4);
+        }
+        if(getControlRegValue(3)==0){    //CH
+            setOutputPinVoltage(20,4);
+        }
+        break;
+    default:    //port control
+        setControlRegValue(getDataValue());
+        if(getControlRegValue(7)==0){
+            Voltage value = inf;
+            int pos = 0;
+            if(getControlRegValue(0)==1){
+                value = high;
+            }
+            else{
+                value = low;
+            }
+            for(int i=0;i<3;i++){
+                if(getControlRegValue(i+1)==1){
+                    pos += 1<<i;
+                }
+            }
+            setPinVoltage(static_cast<MicroCom::Pins>(pos+PP_START+16),value);
+        }
+        break;
+    }
+    return;
+}
+
 
 //set the Register's value
 void PPIs::setControlRegValue(unsigned short value){
@@ -266,9 +222,11 @@ void PPIs::setControlRegValue(Voltage biValue, int pos){
     controlReg |= flag;
 }
 
+
 unsigned short PPIs::getControlRegValue(){
     return controlReg;
 }
+
 
 int PPIs::getControlRegValue(int pos){
     if(pos<0||pos>7){
@@ -285,10 +243,37 @@ int PPIs::getControlRegValue(int pos){
     }
 }
 
-int PPIs::getWorkWay(){
-    int A = 0;
-    int B = 0;
-    A = getControlRegValue(6);
 
+
+MicroCom::PPIWorkWay PPIs::getWorkWay(){
+    int portAway_1 = getControlRegValue(6);
+    int portAway_2 = getControlRegValue(5);
+    int portBway = getControlRegValue(2);
+    if(portAway_1==1){
+        if(portBway == 0){  //A2B0
+            return MicroCom::PPI_A2B0C0;
+        }
+        else{   //A2B1
+            return MicroCom::PPI_A2B1C0;
+        }
+    }
+    else{
+        if(portAway_2==1){
+            if(portBway == 0){  //A1B0
+                return MicroCom::PPI_A1B0C0;
+            }
+            else{   //A1B1
+                return MicroCom::PPI_A1B1C0;
+            }
+        }
+        else{
+            if(portBway == 0){  //A0B0
+                return MicroCom::PPI_A0B0C0;
+            }
+            else{   //A0B1
+                return MicroCom::PPI_A0B1C0;
+            }
+        }
+    }
 }
 

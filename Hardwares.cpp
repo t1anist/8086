@@ -67,37 +67,17 @@ short Hardwares::toTrueForm(unsigned short value, MicroCom::RegsLen len){
  - Input：[value(complement form), MicroCom::RegsLen]
  - Return：a signed short number in true form
 *****************************************************/
-void Hardwares::toBinary(int denary, int binary[]){
-    int j=0;
-    while(denary)
-    {
-        binary[j]=denary%2;
-        denary/=2;
-        j++;
-    }
-    if(j<ADDRNUM){
-        for(int i=j;i<ADDRNUM;i++){
-            binary[i]=0;
-        }
-    }
-    return;
-}
-
-/****************************************************
- - Function：complement form to signed true form
- - Description：The default length of the regs is 16-bit
- - Input：[value(complement form), MicroCom::RegsLen]
- - Return：a signed short number in true form
-*****************************************************/
 unsigned short Hardwares::toDenary(int binary[]){
     unsigned short rst = 0;
     for(int i=0;i<DATANUM;i++){
         if(binary[i]==1){
-            rst += 2^i;
+            rst += 1<<i;
         }
     }
     return rst;
 }
+//这个函数其实是有问题的！
+
 
 /****************************************************
  - Function：delay or sleep

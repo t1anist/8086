@@ -113,6 +113,7 @@ MainWindow::MainWindow(QWidget *parent) :
     link(pp1,MicroCom::PP_D6,bf1,MicroCom::BF5_B6);
     link(pp1,MicroCom::PP_D7,bf1,MicroCom::BF5_B7);
 
+    /** 将缓冲器与8086CPU相连 **/
     link(bf1,MicroCom::BF5_A0,cp1,MicroCom::CP_AD0);
     link(bf1,MicroCom::BF5_A1,cp1,MicroCom::CP_AD1);
     link(bf1,MicroCom::BF5_A2,cp1,MicroCom::CP_AD2);
@@ -122,11 +123,14 @@ MainWindow::MainWindow(QWidget *parent) :
     link(bf1,MicroCom::BF5_A6,cp1,MicroCom::CP_AD6);
     link(bf1,MicroCom::BF5_A7,cp1,MicroCom::CP_AD7);
 
-    cp1->writeBusCycle(0x0076,0x93);
-    qDebug()<<pp1->getControlRegValue();
-    cp1->readBusCycle(0x0072);
-    cp1->readBusCycle(0x0070);
-    cp1->readBusCycle(0x0074);
+    //cp1->setRegValue(MicroCom::al,0x93);
+    mov(cp1,MicroCom::al,0x93);
+    out(cp1,MicroCom::al,0x0076);
+    //cp1->writeBusCycle(0x0076,0x93);
+    //qDebug()<<pp1->getControlRegValue();
+    //cp1->readBusCycle(0x0076);
+   // cp1->readBusCycle(0x0070);
+  //  cp1->readBusCycle(0x0074);
 
 }
 
@@ -164,15 +168,15 @@ MainWindow::~MainWindow()
 }
 
 //mov立即数寻址
-void MainWindow::mov(CPUs *cp, MicroCom::Regs reg, unsigned short value){
+void MainWindow::mov(CPUs* cp, MicroCom::Regs reg, unsigned short value){
     cp->setRegUnsignedValue(reg,value);
     return;
 }
 
 //mov寄存器寻址
-void MainWindow::mov(CPUs *cp, MicroCom::Regs regD, MicroCom::Regs regS, bool isIndirect){
+void MainWindow::mov(CPUs* cp, MicroCom::Regs regD, MicroCom::Regs regS, bool isIndirect){
     unsigned short rst = 0;
-    if(isIndirect==true){
+    if(isIndirect){
         rst = regIndiAddressing(cp,regS);
     }
     else{
@@ -184,7 +188,7 @@ void MainWindow::mov(CPUs *cp, MicroCom::Regs regD, MicroCom::Regs regS, bool is
 
 
 //寄存器间接寻址(read)
-unsigned short MainWindow::regIndiAddressing(CPUs*cp, MicroCom::Regs reg){
+unsigned short MainWindow::regIndiAddressing(CPUs* cp, MicroCom::Regs reg){
     //寄存器间接寻址的寄存器可以是BX、BP、SI和DI
     if(reg!=MicroCom::bx && reg!=MicroCom::bp && reg!=MicroCom::si && reg!=MicroCom::di){
         qDebug("错误发生在寄存器间接寻址函数中。。。");
@@ -230,4 +234,30 @@ void MainWindow::link(Hardwares* sender, MicroCom::Pins pinS, Hardwares* receive
     });
     return;
 }
+
+//输入指令IN
+void MainWindow::in(CPUs* cp, MicroCom::Regs reg, int addr){
+    int inPortAddr = 0;
+    if(addr==-1){   //间接寻址
+        inPortAddr = cp->getRegValue(MicroCom::dx);
+    }
+    else{           //直接寻址
+        inPortAddr = addr;
+    }
+    cp->setRegUnsignedValue(reg,cp->readBusCycle(inPortAddr,false));
+}
+
+//输出指令OUT
+void MainWindow::out(CPUs* cp, MicroCom::Regs reg, int addr){
+    int outPortAddr = 0;
+    unsigned short value = cp->getRegValue(reg);
+    if(addr==-1){   //间接寻址
+        outPortAddr = cp->getRegValue(MicroCom::dx);
+    }
+    else{           //直接寻址
+        outPortAddr = addr;
+    }
+    cp->writeBusCycle(outPortAddr,value,false);
+}
+
 

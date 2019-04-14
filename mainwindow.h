@@ -33,6 +33,12 @@ public:
     void link(Hardwares *sender, MicroCom::Pins pinS, Hardwares *receiver, MicroCom::Pins pinR);
     bool isOdd(int i);
 
+    //Input and Output
+    void in(CPUs* cp, MicroCom::Regs reg, int addr=-1);
+    void out(CPUs* cp, MicroCom::Regs reg, int addr=-1);
+
+
+
 private:
     Ui::MainWindow *ui;
     CPUs* cp1;

@@ -10,7 +10,6 @@ private:
     Voltage pins[PPI_PIN_NUM];
     unsigned short controlReg;
     Counter<PPIs> c;
-    int status;
 
 public:
     PPIs(QString ppiName=nullptr);
@@ -20,15 +19,16 @@ public:
 
     //set the Register's value
     void setControlRegValue(unsigned short value);
-    //set the Register's value by pos
     void setControlRegValue(Voltage biValue, int pos);
 
+    //get the Register's value
     unsigned short getControlRegValue();
     int getControlRegValue(int pos);
+
+    //set the port value
     unsigned short getDataValue();
-
     void setPortPinVoltage(bool isRead, int offset, int len=8);
-
+    //
     void handleIoMode(bool isRead, int port);
     MicroCom::PPIWorkWay getWorkWay();
 

@@ -2,9 +2,11 @@
 
 Decoders::Decoders(QString decoderName){
     status=8;
+    buffer = 0;
     if(decoderName == nullptr){
         decoderName = "74LS138_" + QString::number(c.howMany());
     }
+    //init the pins
     setHardwareName(decoderName);
     for(int i=0;i<6;i++){
         pins[i]=inf;
@@ -14,23 +16,44 @@ Decoders::Decoders(QString decoderName){
     }
 }
 
-//设置引脚电平，并发送输出引脚电平改变信号
+/****************************************************
+ - Function：set the pin's voltage
+ - Description：
+ - Input：the pin's id and voltage value
+ - Output：signal of the pin's voltage have changed
+*****************************************************/
 void Decoders::setPinVoltage(MicroCom::Pins pin, Voltage value){
     pins[pin-DE_START]=value;
     emit pinVolChanged(pin);
 }
 
-//获取引脚电平函数
+/****************************************************
+ - Function：get the pin's voltage
+ - Description：Overridden virtual function
+ - Input：the pin's id(MicroCom::Pins)
+ - Return：the pin's voltage(Voltage)
+*****************************************************/
 Voltage Decoders::getPinVoltage(MicroCom::Pins pin){
     return pins[pin-DE_START];
 }
 
-//处理上游引脚电平改变
+/***************************************************************
+ - Function：deal with the signal of the upriver pin's vol changes
+ - Description：Overridden virtual function
+ - Input：the pin's id and voltage value
+ - Output：output pins' voltage value change
+***************************************************************/
 void Decoders::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
     pins[pin-DE_START]=value;
     //首先只有触发使能端才会有效
     if(pin==MicroCom::DE_G1 || pin==MicroCom::DE_G2a || pin==MicroCom::DE_G2b){
-        //只有使能端均有效时才会触发译码功能
+        //buffer func: make sure the decoder only executes once in the cycle
+        if(buffer!=2){
+            buffer++;
+            return;
+        }
+        buffer=0;
+        //works only when the enable pins' voltage are all low
         if(Decoders::getPinVoltage(MicroCom::DE_G1)==high
                 && Decoders::getPinVoltage(MicroCom::DE_G2a)==low
                 && Decoders::getPinVoltage(MicroCom::DE_G2b)==low){

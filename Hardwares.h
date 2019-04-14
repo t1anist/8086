@@ -16,14 +16,15 @@ public:
     explicit Hardwares(QWidget *parent = nullptr);
     virtual void handlePinVolChanges(MicroCom::Pins pin, Voltage value)=0;
     virtual Voltage getPinVoltage(MicroCom::Pins pin)=0;
+    //set hardware's name
     void setHardwareName(QString hdName);
+    //get hardware's name
     QString getHardwareName();
 
-    //True Form(原码) to Complement Form(补码)
+    //True Form to Complement Form
     unsigned short toCompForm(short value, MicroCom::RegsLen len = MicroCom::dbyte);
-    //Complement Form to True Form 默认长度为16位
+    //Complement Form to True Form
     short toTrueForm(unsigned short value, MicroCom::RegsLen len = MicroCom::dbyte);
-    unsigned short toDenary(int binary[]);
     //非阻塞延时函数
     void delaymsec(int msec);
 

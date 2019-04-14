@@ -18,7 +18,6 @@ public:
     void setPinVoltage(MicroCom::Pins pin, Voltage value);
     Voltage getPinVoltage(MicroCom::Pins pin);
     void handlePinVolChanges(MicroCom::Pins pin, Voltage value);
-    void NandFunction(Voltage inputA, Voltage inputB);
     static int howMany(){return Counter<LogicGate>::howMany();}
 };
 

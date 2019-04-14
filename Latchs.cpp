@@ -1,4 +1,4 @@
-#include "Latchs.h"
+#include "latchs.h"
 
 Latchs::Latchs(QString latchName)
 {

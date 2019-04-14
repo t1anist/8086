@@ -5,14 +5,16 @@
 #define DATANUM 16
 
 /** 常量 **/
-const int SEC = 1000;
-const int LATCH_PIN_NUM = 18;
 const int CPU_PIN_NUM = 36;
 const int CPU_REG_NUM = 14;
+//组合逻辑电路
 const int DECODER_PIN_NUM = 14;
+const int LATCH_PIN_NUM = 18;
 const int BUFFER_PIN_NUM = 18;
-const int PPI_PIN_NUM = 37;     //8255A最大引脚数
-const int LGATE_PIN_NUM = 3;    //逻辑门最大的引脚数
+//可编程芯片
+const int PPI_PIN_NUM = 37;
+//逻辑门电路
+const int LGATE_PIN_NUM = 3;
 
 namespace MicroCom{
 
@@ -232,6 +234,13 @@ enum GateType{
     XOR=5   //异或门
 };
 
+enum ComLogicType{
+    Latch=0,
+    Decoder=1,
+    Buffer4=2,
+    Buffer5=3,
+    Encoder=4
+};
 }
 
 //引脚电平
@@ -240,6 +249,7 @@ enum Voltage{
     low=0,
     inf=-1
 };
+
 
 //模板类，用于类的计数
 template<typename T>

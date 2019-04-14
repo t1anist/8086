@@ -13,12 +13,9 @@ CPUs::CPUs(QString cpuName){
 }
 
 /****************************************************
- - Function：获取寄存器的值
- - Calls：
- - Called By：
-        + getRegValue(MicroCom::Regs reg, short pos)
- - Input：8086CPU内部寄存器号(reg)
- - Return：寄存器的值（类型：unsigned short）
+ - Function：get the register's value
+ - Input：the reg's id
+ - Return：register's value(unsigned short)
 *****************************************************/
 unsigned short CPUs::getRegValue(MicroCom::Regs reg){
     if( reg >= MicroCom::ax && reg < MicroCom::al ){
@@ -35,12 +32,9 @@ unsigned short CPUs::getRegValue(MicroCom::Regs reg){
 }
 
 /****************************************************
- - Function：获取数据线的值
- - Calls：
- - Called By：
-        + getRegValue(MicroCom::Regs reg,short pos)
- - Input：寄存器的长度（8位or16位）
- - Return：数据线表示的值（类型：unsigned short）
+ - Function：get the data from DATA BUS
+ - Input：
+ - Return：data value(unsigned short)
 *****************************************************/
 unsigned short CPUs::getDataValue(){
     unsigned short rst=0;
@@ -59,18 +53,14 @@ unsigned short CPUs::getDataValue(){
 }
 
 /****************************************************
- - Function：get the register's value in a particular position
- - Description：pos limit(16-bit:0-15 8-bit:0-7)
- - Calls：
-        + Voltage getRegValue(MicroCom::Regs reg)
- - Called By：
- - Input：[MicroCom::Regs]
- - Output：register value with complement form
- - Return：Voltage value of the reg's selected pos
+ - Function：get the reg's bit value
+ - Description：bit limit(16-bit:0-15 8-bit:0-7)
+ - Input：the reg's id(MicroCom::Pins)
+ - Return：the reg's bit value
 *****************************************************/
-int CPUs::getRegValue(MicroCom::Regs reg, int pos){
+int CPUs::getRegValue(MicroCom::Regs reg, int bit){
     unsigned short flag = 1;
-    flag <<= pos;
+    flag <<= bit;
     unsigned short rst = getRegValue(reg);
     if((rst & flag)>0){
         return 1;
@@ -83,10 +73,7 @@ int CPUs::getRegValue(MicroCom::Regs reg, int pos){
 /****************************************************
  - Function：set the register's value
  - Description：the value is a signed number
- - Calls：
- - Called By：
- - Input：[MicroCom::Regs]
- - Output：
+ - Input：the reg's id(MicroCom::Regs) and value(short)
  - Return：
 *****************************************************/
 void CPUs::setRegValue(MicroCom::Regs reg, short value){
@@ -109,10 +96,7 @@ void CPUs::setRegValue(MicroCom::Regs reg, short value){
 /****************************************************
  - Function：set the register's value
  - Description：the value is a unsigned number
- - Calls：
- - Called By：
- - Input：[MicroCom::Regs]
- - Output：
+ - Input：the reg's id(MicroCom::Regs)
  - Return：
 *****************************************************/
 void CPUs::setRegUnsignedValue(MicroCom::Regs reg, unsigned short value){
@@ -132,15 +116,12 @@ void CPUs::setRegUnsignedValue(MicroCom::Regs reg, unsigned short value){
 }
 
 /****************************************************
- - Function：设置寄存器某一位的值
- - Description：位限制(16-bit:0-15 8-bit:0-7)
- - Calls：
- - Called By：
- - Input：[MicroCom::Regs]
- - Output：
+ - Function：set register's particular bit value
+ - Description：bit limit(16-bit:0-15 8-bit:0-7)
+ - Input：the reg's id(MicroCom::Regs)
  - Return：
 *****************************************************/
-void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, int pos){
+void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, int bit){
     unsigned short flag = 0;
     unsigned short temp = 1;
     if(biValue==high){
@@ -148,13 +129,13 @@ void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, int pos){
     }
     //Registers excluding ah, bh, ch and dh
     if(reg>=MicroCom::ax && reg<MicroCom::ah){
-        flag <<= pos;
-        temp <<= pos;
+        flag <<= bit;
+        temp <<= bit;
     }
     //ah, bh, ch or dh
     else{
-        flag <<= (pos+8);
-        temp <<= (pos+8);
+        flag <<= (bit+8);
+        temp <<= (bit+8);
     }
     temp = ~temp;
     innerReg[reg] &= temp;
@@ -162,8 +143,9 @@ void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, int pos){
 }
 
 /****************************************************
- - Function：设置地址线
- - Input：20位地址变量（addr）
+ - Function：set ADDR_DATA BUS pins' voltage
+ - Description：
+ - Input：address value(int) and ADDR-or-DATA mode(bool)
  - Return：
 *****************************************************/
 void CPUs::setAddrDataPinsVoltage(int addr, bool isAddr){
@@ -185,9 +167,10 @@ void CPUs::setAddrDataPinsVoltage(int addr, bool isAddr){
 }
 
 /****************************************************
- - Function：读总线周期操作时序
- - Input：20位地址变量（addr）,模式（Memory or IO）
- - Output：地址对应的存储单元或IO端口的值
+ - Function：carry out READ Bus Timing
+ - Description：
+ - Input：address value(int) and Memory-or-IO mode(bool)
+ - Return：Memory or IO interface's data value
 *****************************************************/
 unsigned short CPUs::readBusCycle(int phyAddr, bool isMemory){
     address = phyAddr;
@@ -254,11 +237,14 @@ unsigned short CPUs::readBusCycle(int phyAddr, bool isMemory){
     return data;
 }
 
-/****************************************************
- - Function：写总线周期操作时序
- - Input：20位地址变量（addr）,数据值（value），模式（Memory or IO）
- - Output：数据送入数据线，并通过缓冲器送入存储器或IO
-*****************************************************/
+
+/*********************************************************
+ - Function：Carry out the WRITE Bus Timing
+ - Description：
+ - Input：address value, data value and Memory-or-IO mode
+ - Output：data into DATA BUS, and then into Memory or IO
+*********************************************************/
+
 void CPUs::writeBusCycle(int phyAddr, unsigned short value, bool isMemory){
     address = phyAddr;
     qDebug()<<"========WRITE BUS CYCLE===========";
@@ -322,13 +308,23 @@ void CPUs::writeBusCycle(int phyAddr, unsigned short value, bool isMemory){
     return;
 }
 
-//设置引脚电平并发送信号
+/****************************************************
+ - Function：set the pin's voltage
+ - Description：
+ - Input：the pin's id and voltage
+ - Output：signal of the pin's voltage have changed
+*****************************************************/
 void CPUs::setPinVoltage(MicroCom::Pins pin, Voltage value){
     pins[pin]=value;
     emit pinVolChanged(pin);
 }
 
-//处理来自外部的电平变化
+/****************************************************
+ - Function：
+ - Description：
+ - Input：
+ - Return：
+*****************************************************/
 void CPUs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
     pins[pin]=value;
     if(pin==MicroCom::CP_RESET && value==high){
@@ -336,18 +332,22 @@ void CPUs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
     }
 }
 
+/****************************************************
+ - Function：get the pin's voltage
+ - Description：Overridden virtual function
+ - Input：the pin's id(MicroCom::Pins)
+ - Return：the pin's voltage(Voltage)
+*****************************************************/
 Voltage CPUs::getPinVoltage(MicroCom::Pins pin){
     return pins[pin];
 }
 
-/****************************************************
- - Function：8086CPU复位
- - Calls：
-    + void CPUs::setPinVoltage(MicroCom::Pins pin, Voltage value)
- - Called By：
+/************************************************************
+ - Function：Reset the 8086CPU
+ - Description：Triggered if CP_RESET's voltage is high
  - Input：
- - return：
-*****************************************************/
+ - Output：set pins' voltage and regs' value, and send signal
+*************************************************************/
 void CPUs::resetCPU(){
     qDebug()<<"====================";
     qDebug()<<"====RESET START!====";
@@ -396,9 +396,15 @@ void CPUs::resetCPU(){
     return;
 }
 
-//判断是否为奇数
-bool CPUs::isOdd(int i){
-    return (i&1) == 1;
+
+/****************************************************
+ - Function：Judge whether the number is odd
+ - Description：
+ - Input：number(int)
+ - Return：true or false
+*****************************************************/
+bool CPUs::isOdd(int num){
+    return (num&1) == 1;
 }
 
 

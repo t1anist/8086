@@ -233,6 +233,12 @@ enum BufferType{
     BF_74LS244,
     BF_74LS245
 };
+
+enum ioMode{
+    write,
+    read
+};
+
 }
 
 //引脚电平

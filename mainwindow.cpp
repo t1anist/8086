@@ -191,11 +191,6 @@ void MainWindow::mov(CPUs* cp, MicroCom::Regs regD, MicroCom::Regs regS, bool is
 
 //寄存器间接寻址(read)
 unsigned short MainWindow::regIndiAddressing(CPUs* cp, MicroCom::Regs reg){
-    //寄存器间接寻址的寄存器可以是BX、BP、SI和DI
-    if(reg!=MicroCom::bx && reg!=MicroCom::bp && reg!=MicroCom::si && reg!=MicroCom::di){
-        qDebug("错误发生在寄存器间接寻址函数中。。。");
-        return 1;
-    }
     int addr=0;
     //在默认情况下，如果寄存器是BP，则默认段寄存器为DS，其他情况则默认为DS
     if(reg==MicroCom::bp){
@@ -209,11 +204,6 @@ unsigned short MainWindow::regIndiAddressing(CPUs* cp, MicroCom::Regs reg){
 
 //寄存器间接寻址(write)
 void MainWindow::regIndiAddressing(CPUs *cp, MicroCom::Regs reg, unsigned short value){
-    //寄存器间接寻址的寄存器可以是BX、BP、SI和DI
-    if(reg!=MicroCom::bx && reg!=MicroCom::bp && reg!=MicroCom::si && reg!=MicroCom::di){
-        qDebug("错误发生在寄存器间接寻址函数中。。。");
-        return;
-    }
     int addr=0;
     //在默认情况下，如果寄存器是BP，则默认段寄存器为DS，其他情况则默认为DS
     if(reg==MicroCom::bp){
@@ -225,6 +215,8 @@ void MainWindow::regIndiAddressing(CPUs *cp, MicroCom::Regs reg, unsigned short 
     cp->writeBusCycle(addr,value);
     return;
 }
+
+
 
 
 //连线函数

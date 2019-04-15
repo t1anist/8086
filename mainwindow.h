@@ -29,6 +29,7 @@ public:
     void mov(CPUs *cp, MicroCom::Regs regD, MicroCom::Regs regS, bool isIndirect=false);
     unsigned short regIndiAddressing(CPUs *cp, MicroCom::Regs reg);
     void regIndiAddressing(CPUs *cp, MicroCom::Regs reg, unsigned short value);
+    unsigned short addressing(CPUs *cp, MicroCom::Regs reg, MicroCom::ioMode mode, unsigned short value = 0);
     //连线函数，将两个引脚连接起来
     void link(Hardwares *sender, MicroCom::Pins pinS, Hardwares *receiver, MicroCom::Pins pinR);
     bool isOdd(int i);

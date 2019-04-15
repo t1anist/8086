@@ -33,8 +33,7 @@ SOURCES += \
     PPIs.cpp \
     Decoders.cpp \
     Hardwares.cpp \
-    Buffers244.cpp \
-    Buffers245.cpp
+    Buffers.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -45,8 +44,7 @@ HEADERS += \
     Decoders.h \
     DataType.h \
     Hardwares.h \
-    Buffers244.h \
-    Buffers245.h
+    Buffers.h
 
 FORMS += \
         mainwindow.ui

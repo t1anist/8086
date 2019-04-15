@@ -13,8 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
     la2 = new Latchs("74LS373_2");
     la3 = new Latchs("74LS373_3");
     //两个缓冲器
-    bf1 = new Buffers245("74LS245_1");
-    bf2 = new Buffers245("74LS245_2");
+    bf1 = new Buffers(MicroCom::BF_74LS245,"74LS245_1");
+    bf2 = new Buffers(MicroCom::BF_74LS245,"74LS245_2");
     //8255A可编程并行IO接口
     pp1 = new PPIs("8255A");
     //74LS138译码器
@@ -185,6 +185,8 @@ void MainWindow::mov(CPUs* cp, MicroCom::Regs regD, MicroCom::Regs regS, bool is
     cp->setRegUnsignedValue(regD,rst);
     return;
 }
+
+
 
 
 //寄存器间接寻址(read)

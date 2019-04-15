@@ -12,12 +12,12 @@ PPIs::PPIs(QString ppiName){
 }
 
 void PPIs::setPinVoltage(MicroCom::Pins pin, Voltage value){
-    pins[pin-PP_START]=value;
+    pins[pin]=value;
     emit pinVolChanged(pin);
 }
 
 Voltage PPIs::getPinVoltage(MicroCom::Pins pin){
-    return pins[pin-PP_START];
+    return pins[pin];
 }
 
 unsigned short PPIs::getDataValue(){
@@ -46,13 +46,13 @@ void PPIs::setPortPinVoltage(bool isRead, int offset, int len){
         outPort = offset;
     }
     for(int i=0;i<len;i++){
-        setPinVoltage(static_cast<MicroCom::Pins>(i+outPort+PP_START),pins[i+inPort]);
+        setPinVoltage(static_cast<MicroCom::Pins>(i+outPort),pins[i+inPort]);
     }
 }
 
 //要给方式1、方式2留出实现的接口（√）
 void PPIs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
-    pins[pin-PP_START]=value;
+    pins[pin]=value;
     //如果要进行读写
     if( pin==MicroCom::PP_rd || pin==MicroCom::PP_wr ){
         //如果使能端有效
@@ -67,10 +67,10 @@ void PPIs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
                     int pos =1;
                     for(int i=0;i<8;i++){
                         if((controlReg & pos)>0){
-                            setPinVoltage(static_cast<MicroCom::Pins>(i+PP_START+24),high);
+                            setPinVoltage(static_cast<MicroCom::Pins>(i+24),high);
                         }
                         else{
-                            setPinVoltage(static_cast<MicroCom::Pins>(i+PP_START+24),low);
+                            setPinVoltage(static_cast<MicroCom::Pins>(i+24),low);
                         }
                         pos <<= 1;
                     }
@@ -91,7 +91,7 @@ void PPIs::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
                                 pos += 1<<i;
                             }
                         }
-                        setPinVoltage(static_cast<MicroCom::Pins>(pos+PP_START+16),value);
+                        setPinVoltage(static_cast<MicroCom::Pins>(pos+16),value);
                     }
                 }
                 else{

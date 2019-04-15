@@ -23,7 +23,7 @@ Decoders::Decoders(QString decoderName){
  - Output：signal of the pin's voltage have changed
 *****************************************************/
 void Decoders::setPinVoltage(MicroCom::Pins pin, Voltage value){
-    pins[pin-DE_START]=value;
+    pins[pin]=value;
     emit pinVolChanged(pin);
 }
 
@@ -34,7 +34,7 @@ void Decoders::setPinVoltage(MicroCom::Pins pin, Voltage value){
  - Return：the pin's voltage(Voltage)
 *****************************************************/
 Voltage Decoders::getPinVoltage(MicroCom::Pins pin){
-    return pins[pin-DE_START];
+    return pins[pin];
 }
 
 /***************************************************************
@@ -44,7 +44,7 @@ Voltage Decoders::getPinVoltage(MicroCom::Pins pin){
  - Output：output pins' voltage value change
 ***************************************************************/
 void Decoders::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
-    pins[pin-DE_START]=value;
+    pins[pin]=value;
     //首先只有触发使能端才会有效
     if(pin==MicroCom::DE_G1 || pin==MicroCom::DE_G2a || pin==MicroCom::DE_G2b){
         //buffer func: make sure the decoder only executes once in the cycle
@@ -66,10 +66,10 @@ void Decoders::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
                 }
             }
             for(int i=0;i<8;i++){
-                setPinVoltage(static_cast<MicroCom::Pins>(i+6+DE_START),high);
+                setPinVoltage(static_cast<MicroCom::Pins>(i+6),high);
             }
             //译码器正在执行译码功能
-            setPinVoltage(static_cast<MicroCom::Pins>(rst+6+DE_START),low);
+            setPinVoltage(static_cast<MicroCom::Pins>(rst+6),low);
             status = rst;//status的范围为0~7,表示译码器正在工作
             qDebug()<<"========="<<getHardwareName()<<"WORK========";
             qDebug()<<"y0="<<Decoders::getPinVoltage(MicroCom::DE_y0);
@@ -89,7 +89,7 @@ void Decoders::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
                 return;
             }
             qDebug()<<"========="<<getHardwareName()<<"输出端全置1=========";
-            setPinVoltage(static_cast<MicroCom::Pins>(status+6+DE_START),high);
+            setPinVoltage(static_cast<MicroCom::Pins>(status+6),high);
             //还原译码器输出端口，将译码器的工作状态置为未工作。
             status = 8;
         }

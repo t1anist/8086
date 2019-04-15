@@ -13,7 +13,6 @@ class Decoders : public Hardwares
 {
 private:
     Q_OBJECT
-    const int DE_START = 60;
     int status;
     int buffer;
     Voltage pins[DECODER_PIN_NUM];

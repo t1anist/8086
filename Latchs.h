@@ -6,7 +6,6 @@ class Latchs : public Hardwares
 {
 private:
     Q_OBJECT
-    const int LA_START = 40;
     Voltage pins[LATCH_PIN_NUM];
     Counter<Latchs> c;
     int status;

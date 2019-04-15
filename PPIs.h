@@ -6,7 +6,6 @@ class PPIs : public Hardwares
 {
 private:
     Q_OBJECT
-    const int PP_START = 120;
     Voltage pins[PPI_PIN_NUM];
     unsigned short controlReg;
     Counter<PPIs> c;

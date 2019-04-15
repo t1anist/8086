@@ -6,10 +6,10 @@
 #include <QTimer>
 #include "CPUs.h"
 #include "Latchs.h"
-#include "Buffers245.h"
 #include "PPIs.h"
 #include "Decoders.h"
 #include "LogicGate.h"
+#include "Buffers.h"
 
 namespace Ui {
 class MainWindow;
@@ -45,8 +45,8 @@ private:
     Latchs* la1;
     Latchs* la2;
     Latchs* la3;
-    Buffers245* bf1;
-    Buffers245* bf2;
+    Buffers *bf1;
+    Buffers *bf2;
     Decoders* de1;
     PPIs* pp1;
     LogicGate* nand;

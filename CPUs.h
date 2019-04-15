@@ -11,12 +11,12 @@ public:
     CPUs(QString cpuName = nullptr);
 private:
     Q_OBJECT
-    unsigned short innerReg[CPU_REG_NUM];
+    int innerReg[CPU_REG_NUM];
     Voltage pins[CPU_PIN_NUM];
     int clk_cpu;
     int address;
     int T;  //周期
-    unsigned short data;
+    int data;
     Counter<CPUs> c;
 public:
     //set the pin's voltage
@@ -26,22 +26,21 @@ public:
     Voltage getPinVoltage(MicroCom::Pins pin);
 
     //set the ADDRESS BUS by addr
-    void setAddrDataPinsVoltage(int addr,bool isAddr=true);
+    void setAddrDataPinsVoltage(int addr,bool isData=true);
     //get the DATA BUS value
-    unsigned short getDataValue();
+    int getDataValue(bool isDataBus=true);
 
     //set the Register's value
-    void setRegValue(MicroCom::Regs reg, short value);
-    void setRegUnsignedValue(MicroCom::Regs reg, unsigned short value);
+    void setRegValue(MicroCom::Regs reg, int value);
     void setRegValue(MicroCom::Regs reg, Voltage biValue, int bit);
 
     //get the Register's value
-    unsigned short getRegValue(MicroCom::Regs reg);
+    int getRegValue(MicroCom::Regs reg);
     int getRegValue(MicroCom::Regs reg, int pos);
 
     //Bus Timing
-    unsigned short readBusCycle(int phyAddr, bool isMemory = true);
-    void writeBusCycle(int phyAddr, unsigned short value,  bool isMemory = true);
+    int readBusCycle(int phyAddr, bool isMemory = true);
+    void writeBusCycle(int phyAddr, int value,  bool isMemory = true);
 
     //判断是否为奇数
     bool isOdd(int i);

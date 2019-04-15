@@ -15,18 +15,18 @@ CPUs::CPUs(QString cpuName){
 /****************************************************
  - Function：get the register's value
  - Input：the reg's id
- - Return：register's value(unsigned short)
+ - Return：register's value(int)
 *****************************************************/
-unsigned short CPUs::getRegValue(MicroCom::Regs reg){
+int CPUs::getRegValue(MicroCom::Regs reg){
     if( reg >= MicroCom::ax && reg < MicroCom::al ){
         return innerReg[reg];
     }
     else{
         if(reg >=MicroCom::al && reg<=MicroCom::dl){
-            return (innerReg[reg] & 0x00ff);
+            return (innerReg[reg-16] & 0x00ff);
         }
         else{
-            return (innerReg[reg] >> 8);
+            return (innerReg[reg-20] >> 8);
         }
     }
 }
@@ -36,20 +36,26 @@ unsigned short CPUs::getRegValue(MicroCom::Regs reg){
  - Input：
  - Return：data value(unsigned short)
 *****************************************************/
-unsigned short CPUs::getDataValue(){
-    unsigned short rst=0;
-    int len = 8;
-    qDebug()<<"START GET DATA";
-    if(pins[MicroCom::CP_bhe]==low){
-        len = 16;
-    }
-    for(int i=0;i<len;i++){
-        if(pins[i]==high){
-            rst += 1<<i;
+int CPUs::getDataValue(bool isDataBus){
+    if(isDataBus){
+        int rst=0;
+        int len = 8;
+        qDebug()<<"===========8086CPU START GET DATA============";
+        if(pins[MicroCom::CP_bhe]==low){
+            len = 16;
         }
+        for(int i=0;i<len;i++){
+            if(pins[i]==high){
+                rst += 1<<i;
+            }
+        }
+        qDebug()<<"===========DATA IS"<<rst<<"==============";
+        return rst;
     }
-    qDebug()<<"DATA IS"<<rst;
-    return rst;
+    else{
+        return data;
+    }
+
 }
 
 /****************************************************
@@ -59,9 +65,9 @@ unsigned short CPUs::getDataValue(){
  - Return：the reg's bit value
 *****************************************************/
 int CPUs::getRegValue(MicroCom::Regs reg, int bit){
-    unsigned short flag = 1;
+    int flag = 1;
     flag <<= bit;
-    unsigned short rst = getRegValue(reg);
+    int rst = getRegValue(reg);
     if((rst & flag)>0){
         return 1;
     }
@@ -73,45 +79,24 @@ int CPUs::getRegValue(MicroCom::Regs reg, int bit){
 /****************************************************
  - Function：set the register's value
  - Description：the value is a signed number
- - Input：the reg's id(MicroCom::Regs) and value(short)
+ - Input：the reg's id(MicroCom::Regs) and value(int)
  - Return：
 *****************************************************/
-void CPUs::setRegValue(MicroCom::Regs reg, short value){
+void CPUs::setRegValue(MicroCom::Regs reg, int value){
+    int offset = 16;
     if(reg>=MicroCom::ax && reg<=MicroCom::di){
-        innerReg[reg] = toCompForm(value);
-    }
-    else{
-        unsigned short cValue = toCompForm(value,MicroCom::byte);
-        if( reg>=MicroCom::al && reg<=MicroCom::dl){
-            innerReg[reg] &= 0xff00;
-        }
-        else{
-            innerReg[reg] &= 0x00ff;
-            cValue <<= 8;
-        }
-        innerReg[reg] |= cValue;
-    }
-}
-
-/****************************************************
- - Function：set the register's value
- - Description：the value is a unsigned number
- - Input：the reg's id(MicroCom::Regs)
- - Return：
-*****************************************************/
-void CPUs::setRegUnsignedValue(MicroCom::Regs reg, unsigned short value){
-    if( reg >= MicroCom::ax && reg < MicroCom::al ){
         innerReg[reg] = value;
     }
     else{
-        if(reg>=MicroCom::al && reg<=MicroCom::dl){
-            innerReg[reg] &= 0xff00;
+        if( reg>=MicroCom::al && reg<=MicroCom::dl){
+            innerReg[reg-offset] &= 0xff00;
         }
         else{
-            innerReg[reg] &= 0x00ff;
+            offset = 20;
             value <<= 8;
+            innerReg[reg-offset] &= 0x00ff;
         }
-        innerReg[reg] |= value;
+        innerReg[reg-offset] |= value;
     }
 }
 
@@ -148,14 +133,14 @@ void CPUs::setRegValue(MicroCom::Regs reg, Voltage biValue, int bit){
  - Input：address value(int) and ADDR-or-DATA mode(bool)
  - Return：
 *****************************************************/
-void CPUs::setAddrDataPinsVoltage(int addr, bool isAddr){
+void CPUs::setAddrDataPinsVoltage(int value, bool isData){
     int pos = 1;
     int len = ADDRNUM;
-    if(isAddr==false){
+    if(isData){
         len = DATANUM;
     }
     for(int i=0;i<len;i++){
-        if((addr & pos)>0){
+        if((value & pos)>0){
             setPinVoltage(static_cast<MicroCom::Pins>(i),high);
         }
         else{
@@ -172,7 +157,7 @@ void CPUs::setAddrDataPinsVoltage(int addr, bool isAddr){
  - Input：address value(int) and Memory-or-IO mode(bool)
  - Return：Memory or IO interface's data value
 *****************************************************/
-unsigned short CPUs::readBusCycle(int phyAddr, bool isMemory){
+int CPUs::readBusCycle(int phyAddr, bool isMemory){
     address = phyAddr;
     qDebug()<<"========READ BUS CYCLE===========";
     /** ==============T1 START================**/
@@ -190,7 +175,7 @@ unsigned short CPUs::readBusCycle(int phyAddr, bool isMemory){
     else{
         setPinVoltage(MicroCom::CP_Mio,low);
     }
-    setAddrDataPinsVoltage(address);
+    setAddrDataPinsVoltage(address,false);
     setPinVoltage(MicroCom::CP_bhe,low);
     setPinVoltage(MicroCom::CP_ALE,high);
     setPinVoltage(MicroCom::CP_DTr,low);
@@ -227,8 +212,8 @@ unsigned short CPUs::readBusCycle(int phyAddr, bool isMemory){
     //  3.rd  变为高电平
     delaymsec(2*T);
     qDebug()<<"============T4 START============";
-    for(int i=0;i<20;i++){
-        pins[i]=inf;
+    for(int i=0;i<ADDRNUM;i++){
+        setPinVoltage(static_cast<MicroCom::Pins>(i),inf);
     }
     setPinVoltage(MicroCom::CP_rd,high);
     setPinVoltage(MicroCom::CP_den,high);
@@ -245,7 +230,7 @@ unsigned short CPUs::readBusCycle(int phyAddr, bool isMemory){
  - Output：data into DATA BUS, and then into Memory or IO
 *********************************************************/
 
-void CPUs::writeBusCycle(int phyAddr, unsigned short value, bool isMemory){
+void CPUs::writeBusCycle(int phyAddr, int value, bool isMemory){
     address = phyAddr;
     qDebug()<<"========WRITE BUS CYCLE===========";
     /** ==============T1 START================**/
@@ -263,7 +248,7 @@ void CPUs::writeBusCycle(int phyAddr, unsigned short value, bool isMemory){
     else{
         setPinVoltage(MicroCom::CP_Mio,low);
     }
-    setAddrDataPinsVoltage(address);
+    setAddrDataPinsVoltage(address,false);
     setPinVoltage(MicroCom::CP_bhe,low);
     setPinVoltage(MicroCom::CP_ALE,high);
     setPinVoltage(MicroCom::CP_DTr,high);
@@ -278,7 +263,7 @@ void CPUs::writeBusCycle(int phyAddr, unsigned short value, bool isMemory){
     //  3.wr  在后半周期变为低电平，表示允许写入（rd变低意味着数据从缓冲器到达存储器或IO端口）
     //  4.bhe 变为高电平
     delaymsec(2*T);
-    setAddrDataPinsVoltage(value,false);
+    setAddrDataPinsVoltage(value);
     qDebug()<<"============T2 START=============";
     setPinVoltage(MicroCom::CP_den,low);
     setPinVoltage(MicroCom::CP_bhe,high);

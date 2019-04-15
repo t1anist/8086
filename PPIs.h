@@ -7,7 +7,7 @@ class PPIs : public Hardwares
 private:
     Q_OBJECT
     Voltage pins[PPI_PIN_NUM];
-    unsigned short controlReg;
+    int controlReg;
     Counter<PPIs> c;
 
 public:
@@ -17,15 +17,15 @@ public:
     Voltage getPinVoltage(MicroCom::Pins pin);
 
     //set the Register's value
-    void setControlRegValue(unsigned short value);
+    void setControlRegValue(int value);
     void setControlRegValue(Voltage biValue, int pos);
 
     //get the Register's value
-    unsigned short getControlRegValue();
+    int getControlRegValue();
     int getControlRegValue(int pos);
 
     //set the port value
-    unsigned short getDataValue();
+    int getDataValue();
     void setPortPinVoltage(bool isRead, int offset, int len=8);
     //
     void handleIoMode(bool isRead, int port);

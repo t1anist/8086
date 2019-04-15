@@ -20,8 +20,8 @@ Voltage PPIs::getPinVoltage(MicroCom::Pins pin){
     return pins[pin];
 }
 
-unsigned short PPIs::getDataValue(){
-    unsigned short data = 0;
+int PPIs::getDataValue(){
+    int data = 0;
     qDebug()<<"=============="<<getHardwareName()<<"START GET DATA===============";
     for(int i=0;i<8;i++){
         if(pins[i+24]==high){
@@ -187,7 +187,7 @@ void PPIs::handleIoMode(bool isRead, int port){
 
 
 //set the Register's value
-void PPIs::setControlRegValue(unsigned short value){
+void PPIs::setControlRegValue(int value){
     controlReg &= 0;
     controlReg |= value;
 }
@@ -208,7 +208,7 @@ void PPIs::setControlRegValue(Voltage biValue, int pos){
 
 
 //获取控制字寄存器的值
-unsigned short PPIs::getControlRegValue(){
+int PPIs::getControlRegValue(){
     return controlReg;
 }
 

@@ -212,7 +212,8 @@ enum Regs{
     ah=21,
     bh=22,
     ch=23,
-    dh=24
+    dh=24,
+    no=0
 };
 
 enum RegsLen{
@@ -238,7 +239,6 @@ enum ioMode{
     write,
     read
 };
-
 }
 
 //引脚电平

@@ -24,12 +24,14 @@ public:
     ~MainWindow();
 
     //寄存器寻址
-    unsigned short regAddressing(CPUs *cp, MicroCom::Regs reg);
-    void mov(CPUs *cp, MicroCom::Regs reg, unsigned short value);
-    void mov(CPUs *cp, MicroCom::Regs regD, MicroCom::Regs regS, bool isIndirect=false);
-    unsigned short regIndiAddressing(CPUs *cp, MicroCom::Regs reg);
-    void regIndiAddressing(CPUs *cp, MicroCom::Regs reg, unsigned short value);
-    unsigned short addressing(CPUs *cp, MicroCom::Regs reg, MicroCom::ioMode mode, unsigned short value = 0);
+    void mov(CPUs *cp, MicroCom::Regs reg, int value, bool isAddressing);
+    void mov(CPUs *cp, MicroCom::Regs regD, MicroCom::Regs regS, bool isAddressing=false);
+    void mov(CPUs *cp, MicroCom::Regs regD, int addr);
+   // void mov(CPUs *cp, MicroCom::Regs basedReg, MicroCom::Regs indexedReg, int count)
+    //寄存器间接寻址（相对寻址）
+    int addressing(CPUs *cp, MicroCom::Regs basedReg, MicroCom::ioMode, MicroCom::Regs indexedReg =MicroCom::no,
+                   MicroCom::Regs prefixReg=MicroCom::no, int value=0, int count = 0);
+
     //连线函数，将两个引脚连接起来
     void link(Hardwares *sender, MicroCom::Pins pinS, Hardwares *receiver, MicroCom::Pins pinR);
     bool isOdd(int i);
@@ -37,8 +39,6 @@ public:
     //Input and Output
     void in(CPUs* cp, MicroCom::Regs reg, int addr=-1);
     void out(CPUs* cp, MicroCom::Regs reg, int addr=-1);
-
-
 
 private:
     Ui::MainWindow *ui;

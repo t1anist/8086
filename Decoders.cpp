@@ -53,7 +53,7 @@ void Decoders::handlePinVolChanges(MicroCom::Pins pin, Voltage value){
             return;
         }
         buffer=0;
-        //works only when the enable pins' voltage are all low
+        //works only whendx the enable pins' voltage are all low
         if(Decoders::getPinVoltage(MicroCom::DE_G1)==high
                 && Decoders::getPinVoltage(MicroCom::DE_G2a)==low
                 && Decoders::getPinVoltage(MicroCom::DE_G2b)==low){

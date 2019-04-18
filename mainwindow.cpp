@@ -132,15 +132,15 @@ MainWindow::MainWindow(QWidget *parent) :
     cp1->setRegValue(MicroCom::cl,127);
     qDebug()<<"cp1.cx="<<cp1->getRegValue(MicroCom::cx);*/
 
-   //cp1->setRegValue(MicroCom::al,0xff);
-    //mov(cp1,MicroCom::ax,0xff1);
-    //out(cp1,MicroCom::ax,0x96);
+    //cp1->setRegValue(MicroCom::al,0xff);
+    mov(cp1,MicroCom::ax,0xff,false);
+    out(cp1,MicroCom::ax,0x76);
     //qDebug()<<pp1->getControlRegValue();
     //cp1->writeBusCycle(0x0076,0x93);
     //qDebug()<<pp1->getControlRegValue();
     //cp1->readBusCycle(0x0076);
-   // cp1->readBusCycle(0x0070);
-  //  cp1->readBusCycle(0x0074);
+   //cp1->readBusCycle(0x0070);
+  //cp1->readBusCycle(0x0074);
 
 }
 
@@ -177,7 +177,7 @@ MainWindow::~MainWindow()
     nand=nullptr;
 }
 
-//mov立即数寻址（直接寻址）
+//mov立即数寻址（直接寻址）[value -> reg]
 void MainWindow::mov(CPUs* cp, MicroCom::Regs reg, int value, bool isAddressing){
     if(isAddressing){
         value = cp->readBusCycle(value);
@@ -186,50 +186,87 @@ void MainWindow::mov(CPUs* cp, MicroCom::Regs reg, int value, bool isAddressing)
     return;
 }
 
-//mov寄存器寻址（寄存器间接寻址）
+//mov寄存器直接寻址（寄存器间接寻址）
+/*
 void MainWindow::mov(CPUs* cp, MicroCom::Regs regD, MicroCom::Regs regS, bool isAddressing){
     int rst = 0;
     if(isAddressing){
-        rst = addressing(cp,regS,MicroCom::read);
+        rst = readAddressing(cp,regS);
     }
     else{
         rst = cp->getRegValue(regS);
     }
     cp->setRegValue(regD,rst);
     return;
-}
+}*/
 
-int MainWindow::addressing(CPUs *cp, MicroCom::Regs basedReg, MicroCom::ioMode mode, MicroCom::Regs indexedReg, MicroCom::Regs prefixReg, int value, int count){
-    int phyAddr = 0;
-    if(prefixReg != MicroCom::no){
-        phyAddr = cp->getRegValue(prefixReg)*16 + cp->getRegValue(basedReg);
+//mov寄存器间接寻址（寄存器间接寻址）
+void MainWindow::mov(CPUs *cp, int addr, MicroCom::Regs regS, bool isAddressing){
+    int rst = 0;
+    if(isAddressing){
+        rst = readAddressing(cp,regS);
     }
     else{
-        if(basedReg==MicroCom::bp){
-            phyAddr = cp->getRegValue(MicroCom::ss)*16 + cp->getRegValue(basedReg);
+        rst = cp->getRegValue(regS);
+    }
+    cp->writeBusCycle(addr,rst);
+    return;
+}
+
+
+
+
+
+//read addressing
+int MainWindow::readAddressing(CPUs *cp, MicroCom::Regs based, MicroCom::Regs indexed, MicroCom::Regs prefixed, int count){
+    int phyAddr = 0;
+    if(prefixed != MicroCom::no){
+        phyAddr = cp->getRegValue(prefixed)*16 + cp->getRegValue(based);
+    }
+    else{
+        if(based==MicroCom::bp){
+            phyAddr = cp->getRegValue(MicroCom::ss)*16 + cp->getRegValue(based);
         }
         else{
-            phyAddr = cp->getRegValue(MicroCom::ds)*16 + cp->getRegValue(basedReg);
+            phyAddr = cp->getRegValue(MicroCom::ds)*16 + cp->getRegValue(based);
         }
     }
     //偏移量
     if(count!=0){
-        phyAddr += value;
+        phyAddr += count;
     }
     //变址指针
-    if(indexedReg != MicroCom::no){
-        phyAddr += cp->getRegValue(indexedReg);
+    if(indexed != MicroCom::no){
+        phyAddr += cp->getRegValue(indexed);
     }
-    //read mode
-    if(mode==MicroCom::read){
-        cp->readBusCycle(phyAddr);
-        return cp->getDataValue(false);
+    cp->readBusCycle(phyAddr);
+    return cp->getDataValue(false);
+}
+
+//write addressing
+void MainWindow::writeAddressing(CPUs *cp, MicroCom::Regs based, int value, MicroCom::Regs indexed, MicroCom::Regs prefixed, int count){
+    int phyAddr = 0;
+    if(prefixed != MicroCom::no){
+        phyAddr = cp->getRegValue(prefixed)*16 + cp->getRegValue(based);
     }
-    //write mode
     else{
-        cp->writeBusCycle(phyAddr,value);
-        return 0;
+        if(based==MicroCom::bp){
+            phyAddr = cp->getRegValue(MicroCom::ss)*16 + cp->getRegValue(based);
+        }
+        else{
+            phyAddr = cp->getRegValue(MicroCom::ds)*16 + cp->getRegValue(based);
+        }
     }
+    //偏移量
+    if(count!=0){
+        phyAddr += count;
+    }
+    //变址指针
+    if(indexed != MicroCom::no){
+        phyAddr += cp->getRegValue(indexed);
+    }
+    cp->writeBusCycle(phyAddr,value);
+    return;
 }
 
 //连线函数

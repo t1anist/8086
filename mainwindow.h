@@ -23,15 +23,27 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    //寄存器寻址
+    //mov 立即数寻址
+    //  ·送入寄存器
     void mov(CPUs *cp, MicroCom::Regs reg, int value, bool isAddressing);
-    void mov(CPUs *cp, MicroCom::Regs regD, MicroCom::Regs regS, bool isAddressing=false);
+    //  ·送入存储单元
+    void mov(CPUs *cp, int addr, int imValue);
+
+    //mov 直接寻址
+    //  存储单元 -> 寄存器
     void mov(CPUs *cp, MicroCom::Regs regD, int addr);
+    //  存储单元 ->
+
+    //mov 寄存器直接寻址/间接寻址
+    // memory -> reg
+    void mov(CPUs *cp, MicroCom::Regs regD, MicroCom::Regs regS, bool isAddressing);
+    // memory -> reg
+
+    void mov(CPUs *cp, int addr, MicroCom::Regs regS, bool isAddressing=false);
    // void mov(CPUs *cp, MicroCom::Regs basedReg, MicroCom::Regs indexedReg, int count)
     //寄存器间接寻址（相对寻址）
-    int addressing(CPUs *cp, MicroCom::Regs basedReg, MicroCom::ioMode, MicroCom::Regs indexedReg =MicroCom::no,
-                   MicroCom::Regs prefixReg=MicroCom::no, int value=0, int count = 0);
-
+    int readAddressing(CPUs *cp, MicroCom::Regs, MicroCom::Regs indexed =MicroCom::no, MicroCom::Regs prefix=MicroCom::no, int count=0);
+    void writeAddressing(CPUs *cp, MicroCom::Regs, int value=0, MicroCom::Regs indexed=MicroCom::no, MicroCom::Regs prefixed=MicroCom::no, int count=0);
     //连线函数，将两个引脚连接起来
     void link(Hardwares *sender, MicroCom::Pins pinS, Hardwares *receiver, MicroCom::Pins pinR);
     bool isOdd(int i);

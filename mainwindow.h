@@ -24,18 +24,19 @@ public:
     ~MainWindow();
 
     /** mov指令 **/
-    //mov 立即数寻址（将直接寻址与立即数寻址合并，通过bool isAddressing区分）
-    void mov(MicroCom::Regs target, int imValue, bool isAddressing=false);
-    void mov(int addr, int imValue);
+    //mov 立即数寻址
+    //immediate value to target Register
+    void mov(MicroCom::Regs target, int imValue);
+    //immediate value to memory
+    void mov(int imValue, int tAddr);
+    void mov(int imValue, MicroCom::Regs tBased, int tOffset, MicroCom::Regs tIndexed,  MicroCom::Regs tPrefixed=MicroCom::no);
 
     //mov 寄存器寻址
     void mov(MicroCom::Regs target, MicroCom::Regs source);
-    void mov(int addr, MicroCom::Regs source);
-    //有没有一种简练的方法满足：1、读写mov同名；2、尽可能多地初始化参数；3、辨识度高
-    void mov(MicroCom::Regs tBased, int tOffset, MicroCom::Regs tIndexed,  MicroCom::Regs sPrefixed=MicroCom::no);
+    void mov(MicroCom::Dir, int addr, MicroCom::Regs reg);
 
     //mov 寄存器间接/相对寻址
-    void mov(MicroCom::Regs target, MicroCom::Regs sBased, int sOffset, MicroCom::Regs sIndexed=MicroCom::no, MicroCom::Regs sPrefixed=MicroCom::no);
+    void mov(MicroCom::Dir, MicroCom::Regs reg, MicroCom::Regs based, int offset, MicroCom::Regs indexed=MicroCom::no, MicroCom::Regs prefixed=MicroCom::no);
 
     /** in/out指令 **/
     void in(MicroCom::Regs reg, int addr=-1);
@@ -52,15 +53,11 @@ public:
     void pop(int addr);
 
     /** XCHG交换指令 **/
-    //to register
+    //CPU to Memory(MicroCom::Out) or Memory to CPU(MicroCom::Read)
+    void xChg(MicroCom::Dir, MicroCom::Regs reg, MicroCom::Regs based, int offset, MicroCom::Regs indexed=MicroCom::no, MicroCom::Regs prefixed=MicroCom::no);
+    void xChg(MicroCom::Dir, MicroCom::Regs reg, int addr);
+    //CPU to CPU
     void xChg(MicroCom::Regs target, MicroCom::Regs source);
-    void xChg(MicroCom::Regs target, MicroCom::Regs sBased, int sOffset, MicroCom::Regs sIndexed=MicroCom::no, MicroCom::Regs sPrefixed=MicroCom::no);
-    void xChg(MicroCom::Regs target, int sAddr);
-
-    //to Memory
-    void xChg(int targetAddr, MicroCom::Regs source);
-    //void xChg(MicroCom::Regs tBased, int tOffset, MicroCom::Regs tPrefixed, MicroCom::Regs source);
-    //void xChg(MicroCom::Regs tBased, MicroCom::Regs tIndexed, int tOffset, MicroCom::Regs tPrefixed, MicroCom::Regs source);
 
     /** LEA取地址有效指令 **/
     //lea要求源操作数只能是存储单元，并且目的操作数必须是一个寄存器  (变量怎么表示呢？)

@@ -179,10 +179,7 @@ MainWindow::~MainWindow()
 
 /** mov指令 **/
 //mov 立即数寻址（将直接寻址与立即数寻址合并，通过bool isAddressing区分）
-void MainWindow::mov(MicroCom::Regs target, int value, bool isAddressing){
-    if(isAddressing){
-        value = cp->readBusCycle(value);
-    }
+void MainWindow::mov(MicroCom::Regs target, int value){
     cp->setRegValue(target,value);
     return;
 }
@@ -199,17 +196,30 @@ void MainWindow::mov(MicroCom::Regs target, MicroCom::Regs source){
     return;
 }
 
-void MainWindow::mov(int addr, MicroCom::Regs source){
-    int value = cp->getRegValue(source);
-    cp->writeBusCycle(addr,value);
+void MainWindow::mov(MicroCom::Dir dir, int addr, MicroCom::Regs reg){
+    int value = 0;
+    if(dir==MicroCom::In){
+        value = cp->readBusCycle(addr);
+        cp->setRegValue(reg,value);
+    }
+    else{
+        value = cp->getRegValue(reg);
+        cp->writeBusCycle(addr,value);
+    }
     return;
 }
 
-//mov 寄存器间接/相对寻址 (相对)基址变址寻址
-void MainWindow::mov(MicroCom::Regs target, MicroCom::Regs sBased, int sOffset, MicroCom::Regs sIndexed, MicroCom::Regs sPrefixed){
-    int phyAddr = getPhyAddr(sBased,sOffset,sIndexed,sPrefixed);
-    int value = cp->readBusCycle(phyAddr);
-    cp->setRegValue(target, value);
+void MainWindow::mov(MicroCom::Dir dir, MicroCom::Regs reg, MicroCom::Regs based, int offset, MicroCom::Regs indexed, MicroCom::Regs prefixed){
+    int phyAddr = getPhyAddr(based,offset,indexed,prefixed);
+    int value = 0;
+    if(dir == MicroCom::In){
+        value = cp->readBusCycle(phyAddr);
+        cp->setRegValue(reg,value);
+    }
+    else{
+        value = cp->getRegValue(reg);
+        cp->writeBusCycle(phyAddr,value);
+    }
     return;
 }
 

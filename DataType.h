@@ -235,9 +235,9 @@ enum BufferType{
     BF_74LS245
 };
 
-enum ioMode{
-    write,
-    read
+enum Dir{
+    In,
+    Out
 };
 }
 

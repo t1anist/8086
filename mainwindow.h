@@ -25,17 +25,16 @@ public:
 
     /** mov指令 **/
     //mov 立即数寻址
-    //immediate value to target Register
+    //immediate value to Register
     void mov(MicroCom::Regs target, int imValue);
-    //immediate value to memory
+    //immediate value to Memory
     void mov(int imValue, int tAddr);
     void mov(int imValue, MicroCom::Regs tBased, int tOffset, MicroCom::Regs tIndexed,  MicroCom::Regs tPrefixed=MicroCom::no);
-
-    //mov 寄存器寻址
+    //Register to Register
     void mov(MicroCom::Regs target, MicroCom::Regs source);
+    //Register to Memory
     void mov(MicroCom::Dir, int addr, MicroCom::Regs reg);
-
-    //mov 寄存器间接/相对寻址
+    //Memory to Register & Register to Memory
     void mov(MicroCom::Dir, MicroCom::Regs reg, MicroCom::Regs based, int offset, MicroCom::Regs indexed=MicroCom::no, MicroCom::Regs prefixed=MicroCom::no);
 
     /** in/out指令 **/
@@ -47,10 +46,12 @@ public:
     void push(MicroCom::Regs source);
     void push(MicroCom::Regs sBased, int tOffset, MicroCom::Regs tIndexed, MicroCom::Regs tPrefixed=MicroCom::no);
     void push(int addr);
+    void push(QString var);
     //pop
     void pop(MicroCom::Regs target);
     void pop(MicroCom::Regs tBased, int tOffset, MicroCom::Regs tIndexed, MicroCom::Regs tPrefixed=MicroCom::no);
     void pop(int addr);
+    void pop(QString var);
 
     /** XCHG交换指令 **/
     //CPU to Memory(MicroCom::Out) or Memory to CPU(MicroCom::Read)
@@ -60,15 +61,15 @@ public:
     void xChg(MicroCom::Regs target, MicroCom::Regs source);
 
     /** LEA取地址有效指令 **/
-    //lea要求源操作数只能是存储单元，并且目的操作数必须是一个寄存器  (变量怎么表示呢？)
+    //lea要求源操作数只能是存储单元，并且目的操作数必须是一个寄存器 (变量怎么表示呢？)
     //void LoadEffectiveAdds();
     void lea(MicroCom::Regs target, MicroCom::Regs sBased, int sOffset, MicroCom::Regs sIndexed=MicroCom::no);
-    void lea(MicroCom::Regs target, QString symbol);
+    void lea(MicroCom::Regs target, QString var);
 
     /** LDS将双字指针送到寄存器和DS指令(Load Pointer Using DS) **/
-    void loadPointerUsingDS(MicroCom::Regs target, MicroCom::Regs sBased, int sOffset, MicroCom::Regs sIndexed=MicroCom::no);
-    void loadPointerUsingDS(MicroCom::Regs target, int sAddr);
-    void loadPointerUsingDS(MicroCom::Regs target, QString symbol);
+    void lds(MicroCom::Regs target, MicroCom::Regs sBased, int sOffset, MicroCom::Regs sIndexed=MicroCom::no);
+    void lds(MicroCom::Regs target, int sAddr);
+    void lds(MicroCom::Regs target, QString symbol);
 
 
 

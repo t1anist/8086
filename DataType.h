@@ -248,6 +248,27 @@ enum Voltage{
     inf=-1
 };
 
+struct MemoryUnit{
+    MicroCom::Regs based = MicroCom::no;
+    MicroCom::Regs indexed = MicroCom::no;
+    MicroCom::Regs prefixed = MicroCom::no;
+    int addr_offset = 0;
+    MemoryUnit(MicroCom::Regs source, int count=0, MicroCom::Regs prefix=MicroCom::no){
+        based = source;
+        addr_offset = count;
+        prefixed = prefix;
+    }
+    MemoryUnit(MicroCom::Regs base, MicroCom::Regs index, int count=0, MicroCom::Regs prefix=MicroCom::no){
+        based = base;
+        indexed = index;
+        prefixed = prefix;
+        addr_offset = count;
+    }
+    MemoryUnit(int addr){
+        addr_offset = addr;
+    }
+};
+
 
 //模板类，用于类的计数
 template<typename T>

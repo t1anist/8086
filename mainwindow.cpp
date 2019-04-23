@@ -135,12 +135,15 @@ MainWindow::MainWindow(QWidget *parent) :
     //cp->setRegValue(MicroCom::al,0xff);
     mov(MicroCom::ax,0xff);
     out(MicroCom::ax,0x76);
+    add(MicroCom::In,MicroCom::ax,MemoryUnit(MicroCom::bx),false);
+    //mov(MicroCom::In,MicroCom::ax,MicroCom::bx,0);  //MOV AX,[BX]
+    //mov(MicroCom::Out,MicroCom::ax,MicroCom::bx,0); //MOV [BX],AX
     //qDebug()<<pp1->getControlRegValue();
     //cp->writeBusCycle(0x0076,0x93);
     //qDebug()<<pp1->getControlRegValue();
     //cp->readBusCycle(0x0076);
-   //cp->readBusCycle(0x0070);
-  //cp->readBusCycle(0x0074);
+    //cp->readBusCycle(0x0070);
+    //cp->readBusCycle(0x0074);
 
 }
 
@@ -257,7 +260,6 @@ void MainWindow::push(MicroCom::Regs sBased, int offset, MicroCom::Regs sIndexed
     return;
 }
 
-
 //目的操作数为寄存器
 void MainWindow::pop(MicroCom::Regs target){
     int phyAddr = getPhyAddr(MicroCom::sp,0);
@@ -308,6 +310,16 @@ int MainWindow::getPhyAddr(MicroCom::Regs based, int offset, MicroCom::Regs inde
 }
 
 
+void MainWindow::add(MicroCom::Dir, MicroCom::Regs reg, MemoryUnit m, bool isCarry){
+    int phyAddr = getPhyAddr(m.based,m.offset,m.indexed,m.prefixed);
+    if(isCarry){
+
+    }
+    else{
+
+    }
+}
+
 
 //连线函数
 void MainWindow::link(Hardwares* sender, MicroCom::Pins pinS, Hardwares* receiver, MicroCom::Pins pinR){
@@ -318,8 +330,6 @@ void MainWindow::link(Hardwares* sender, MicroCom::Pins pinS, Hardwares* receive
     });
     return;
 }
-
-
 
 //输入指令IN
 void MainWindow::in(MicroCom::Regs reg, int addr){
@@ -344,6 +354,38 @@ void MainWindow::out(MicroCom::Regs reg, int addr){
         outPortAddr = addr;
     }
     cp->writeBusCycle(outPortAddr,value,false);
+}
+
+
+/** 标志位传送指令(Flag Transfers) **/
+/****************************************************
+ - Function：Push Flag on Stack
+ - Description：对标志位无影响
+ - Input：无
+ - Output：SP←(SP-2)
+*****************************************************/
+void MainWindow::pushf(){
+    int flagsValue = cp->getRegValue(MicroCom::flags);
+    int stackAddr = getPhyAddr(MicroCom::sp,0)-2;
+    int spNewValue = cp->getRegValue(MicroCom::sp)-2;
+    cp->setRegValue(MicroCom::sp,spNewValue);
+    cp->writeBusCycle(stackAddr,flagsValue);
+    return;
+}
+
+/****************************************************
+ - Function：Pop Flag off Stack
+ - Description：对标志位无影响
+ - Input：无
+ - Output：SP←(SP+2)
+*****************************************************/
+void MainWindow::popf(){
+    int stackAddr = this->getPhyAddr(MicroCom::sp,0);
+    int spNewValue = cp->getRegValue(MicroCom::sp)+2;
+    int flagsValue = cp->readBusCycle(stackAddr);
+    cp->setRegValue(MicroCom::sp,spNewValue);
+    cp->setRegValue(MicroCom::flags,flagsValue);
+    return;
 }
 
 

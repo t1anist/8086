@@ -88,6 +88,7 @@ void CPUs::setRegValue(MicroCom::Regs reg, int value){
         innerReg[reg] = value;
     }
     else{
+        value &= 0x00ff;
         if( reg>=MicroCom::al && reg<=MicroCom::dl){
             innerReg[reg-offset] &= 0xff00;
         }

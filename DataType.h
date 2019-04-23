@@ -252,7 +252,7 @@ struct MemoryUnit{
     MicroCom::Regs based = MicroCom::no;
     MicroCom::Regs indexed = MicroCom::no;
     MicroCom::Regs prefixed = MicroCom::no;
-    int addr_offset = 0;
+    int addr_offset = -1;
     MemoryUnit(MicroCom::Regs source, int count=0, MicroCom::Regs prefix=MicroCom::no){
         based = source;
         addr_offset = count;

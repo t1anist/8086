@@ -29,39 +29,29 @@ public:
     //immediate value to Register
     void mov(MicroCom::Regs target, int imValue);
     //immediate value to Memory
-    void mov(int imValue, MemoryUnit m);
-    void mov(int imValue, int tAddr);
-    void mov(int imValue, MicroCom::Regs tBased, int tOffset, MicroCom::Regs tIndexed,  MicroCom::Regs tPrefixed=MicroCom::no);
-    void mov(int imValue, QString var);
+    void mov(MemoryUnit m, int imValue);
     //Register to Register
     void mov(MicroCom::Regs target, MicroCom::Regs source);    
     //Memory to Register & Register to Memory
     void mov(MicroCom::Dir, MicroCom::Regs reg, MemoryUnit m);
-    void mov(MicroCom::Dir, MicroCom::Regs reg, QString var);   //STR db 10h  (mov al,STR) (mov STR,al)
-    void mov(MicroCom::Dir, int addr, MicroCom::Regs reg);      //(mov [100h],bx)  (mov bx,[100h])
-    void mov(MicroCom::Dir, MicroCom::Regs reg, MicroCom::Regs based, int offset, MicroCom::Regs indexed=MicroCom::no, MicroCom::Regs prefixed=MicroCom::no);
-    //(mov AX,COUNT[BX][SI])  (mov count[bx][si],AX)
 
     /** in/out指令 **/
     void in(MicroCom::Regs reg, int addr=-1);
     void out(MicroCom::Regs reg, int addr=-1);
 
     /** 出入栈指令 **/
-    //push
+    //push Register on stack
     void push(MicroCom::Regs source);
-    void push(MicroCom::Regs sBased, int tOffset, MicroCom::Regs tIndexed, MicroCom::Regs tPrefixed=MicroCom::no);
-    void push(int addr);
-    void push(QString var);
-    //pop
+    //push Memory on stack
+    void push(MemoryUnit m);
+    //pop stack to Register
     void pop(MicroCom::Regs target);
-    void pop(MicroCom::Regs tBased, int tOffset, MicroCom::Regs tIndexed, MicroCom::Regs tPrefixed=MicroCom::no);
-    void pop(int addr);
-    void pop(QString var);
+    //pop stack to Memory
+    void pop(MemoryUnit m);
 
     /** XCHG交换指令 **/
     //Register to Memory & Memory to Register
-    void xChg(MicroCom::Dir, MicroCom::Regs reg, MicroCom::Regs based, int offset, MicroCom::Regs indexed=MicroCom::no, MicroCom::Regs prefixed=MicroCom::no);
-    void xChg(MicroCom::Dir, MicroCom::Regs reg, int addr);
+    void xChg(MicroCom::Dir, MicroCom::Regs reg, MemoryUnit m);
     //Register to Register
     void xChg(MicroCom::Regs target, MicroCom::Regs source);
 
@@ -69,10 +59,8 @@ public:
     /* 该类指令要求源操作数只能是存储单元,且目的操作数只能是寄存器 */
     // LEA取地址有效指令(Load Effective Address)
     void lea(MicroCom::Regs target, MemoryUnit m);
-
     // LDS将双字指针送到寄存器和DS指令(Load Pointer Using DS)
     void lds(MicroCom::Regs target, MemoryUnit m);
-
     // LES将双字指针送到寄存器和ES指令(Load Pointer Using ES)
     void les(MicroCom::Regs target, MemoryUnit m);
 
@@ -97,7 +85,7 @@ public:
 
 
     /** 寻址指令 **/
-    int getPhyAddr(MicroCom::Regs based, int offset, MicroCom::Regs indexed= MicroCom::no, MicroCom::Regs prefixed=MicroCom::no);
+    int getPhyAddr(MemoryUnit m);
 
     //连线函数，将两个引脚连接起来
     void link(Hardwares *sender, MicroCom::Pins pinS, Hardwares *receiver, MicroCom::Pins pinR);

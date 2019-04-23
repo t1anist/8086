@@ -187,33 +187,22 @@ void MainWindow::mov(MicroCom::Regs target, int value){
     return;
 }
 
-void MainWindow::mov(int addr, int imValue){
-    cp->writeBusCycle(addr,imValue);
+//
+void MainWindow::mov(MemoryUnit m, int imValue){
+    int phyAddr = getPhyAddr(m);
+    cp->writeBusCycle(phyAddr,imValue);
     return;
 }
 
-//mov 寄存器寻址
+//mov 寄存器→寄存器
 void MainWindow::mov(MicroCom::Regs target, MicroCom::Regs source){
     int value = cp->getRegValue(source);
     cp->setRegValue(target,value);
     return;
 }
 
-void MainWindow::mov(MicroCom::Dir dir, int addr, MicroCom::Regs reg){
-    int value = 0;
-    if(dir==MicroCom::In){
-        value = cp->readBusCycle(addr);
-        cp->setRegValue(reg,value);
-    }
-    else{
-        value = cp->getRegValue(reg);
-        cp->writeBusCycle(addr,value);
-    }
-    return;
-}
-
-void MainWindow::mov(MicroCom::Dir dir, MicroCom::Regs reg, MicroCom::Regs based, int offset, MicroCom::Regs indexed, MicroCom::Regs prefixed){
-    int phyAddr = getPhyAddr(based,offset,indexed,prefixed);
+void MainWindow::mov(MicroCom::Dir dir, MicroCom::Regs reg, MemoryUnit m){
+    int phyAddr = getPhyAddr(m);
     int value = 0;
     if(dir == MicroCom::In){
         value = cp->readBusCycle(phyAddr);
@@ -228,6 +217,7 @@ void MainWindow::mov(MicroCom::Dir dir, MicroCom::Regs reg, MicroCom::Regs based
 
 
 /** 出入栈指令 **/
+//push
 //源操作数为寄存器
 void MainWindow::push(MicroCom::Regs source){
     int value = cp->getRegValue(source);
@@ -239,85 +229,74 @@ void MainWindow::push(MicroCom::Regs source){
 }
 
 //源操作数为存储单元
-//直接赋予地址
-void MainWindow::push(int addr){
-    int value = cp->readBusCycle(addr);
-    int newSpValue = cp->getRegValue(MicroCom::sp)-2;
-    int stackAddr = cp->getRegValue(MicroCom::ss)*16 + newSpValue;
-    cp->writeBusCycle(stackAddr,value);
-    cp->setRegValue(MicroCom::sp,newSpValue);
-    return;
-}
-
-//从寄存器中读取地址
-void MainWindow::push(MicroCom::Regs sBased, int offset, MicroCom::Regs sIndexed,MicroCom::Regs sPrefixed){
-    int phyAddr = getPhyAddr(sBased,offset,sIndexed,sPrefixed);
+void MainWindow::push(MemoryUnit m){
+    int phyAddr = getPhyAddr(m);
     int value = cp->readBusCycle(phyAddr);
     int newSpValue = cp->getRegValue(MicroCom::sp)-2;
     int stackAddr = cp->getRegValue(MicroCom::ss)*16 + newSpValue;
     cp->setRegValue(MicroCom::sp,newSpValue);
     cp->writeBusCycle(stackAddr,value);
-    return;
 }
 
 //目的操作数为寄存器
 void MainWindow::pop(MicroCom::Regs target){
-    int phyAddr = getPhyAddr(MicroCom::sp,0);
-    int value = cp->readBusCycle(phyAddr);
+    int stackAddr = getPhyAddr(MemoryUnit(MicroCom::sp));
+    int value = cp->readBusCycle(stackAddr);
     cp->setRegValue(target,value);
     cp->setRegValue(MicroCom::sp,cp->getRegValue(MicroCom::sp)+2);
     return;
 }
 
 //目的操作数为存储单元
-void MainWindow::pop(int addr){
-    int phyAddr = getPhyAddr(MicroCom::sp,0);
-    int value = cp->readBusCycle(phyAddr);
-    cp->writeBusCycle(addr,value);
-    cp->setRegValue(MicroCom::sp,cp->getRegValue(MicroCom::sp)+2);
-    return;
-}
-
-void MainWindow::pop(MicroCom::Regs tBased, int tOffset, MicroCom::Regs tIndexed, MicroCom::Regs tPrefixed){
-    int stackAddr = getPhyAddr(MicroCom::sp,0);
+void MainWindow::pop(MemoryUnit m){
+    int stackAddr = getPhyAddr(MemoryUnit(MicroCom::sp));
     int value = cp->readBusCycle(stackAddr);
-    int phyAddr = getPhyAddr(tBased,tOffset,tIndexed,tPrefixed);
-    cp->writeBusCycle(phyAddr,value);
-    cp->setRegValue(MicroCom::sp,cp->getRegValue(MicroCom::sp)+2);
+    int tPhyAddr = getPhyAddr(m);
+    cp->writeBusCycle(tPhyAddr,value);
+    cp->setRegValue(MicroCom::sp,cp->getRegValue(MicroCom::sp)-2);
     return;
 }
 
 /** 获取物理地址函数 **/
-int MainWindow::getPhyAddr(MicroCom::Regs based, int offset, MicroCom::Regs indexed, MicroCom::Regs prefixed){
+int MainWindow::getPhyAddr(MemoryUnit m){
+    if(m.based==MicroCom::no){
+        return m.addr_offset;
+    }
     int phyAddr = 0;
     int segAddr = 0;
-    if(prefixed != MicroCom::no){
-        segAddr = cp->getRegValue(prefixed);
+    if(m.prefixed != MicroCom::no){
+        segAddr = cp->getRegValue(m.prefixed);
     }
     else{
-        if(based == MicroCom::bp){
+        if(m.based == MicroCom::bp || m.based == MicroCom::sp){
             segAddr = cp->getRegValue(MicroCom::ss);
         }
         else{
             segAddr = cp->getRegValue(MicroCom::ds);
         }
     }
-    phyAddr = segAddr*16 + cp->getRegValue(based) + offset;
-    if(indexed != MicroCom::no){
-        phyAddr += cp->getRegValue(indexed);
+    phyAddr = segAddr*16 + cp->getRegValue(m.based) + m.addr_offset;
+    if(m.indexed != MicroCom::no){
+        phyAddr += cp->getRegValue(m.indexed);
     }
-    return cp->readBusCycle(phyAddr);
+    return phyAddr;
 }
 
 
-void MainWindow::add(MicroCom::Dir, MicroCom::Regs reg, MemoryUnit m, bool isCarry){
-    int phyAddr = getPhyAddr(m.based,m.offset,m.indexed,m.prefixed);
+void MainWindow::add(MicroCom::Dir dir, MicroCom::Regs reg, MemoryUnit m, bool isCarry){
+    int phyAddr = getPhyAddr(m);
+    int mryValue = cp->readBusCycle(phyAddr);
+    int regValue = cp->getRegValue(reg);
     if(isCarry){
-
+        regValue += cp->getRegValue(MicroCom::flags,0);
+    }
+    if(dir == MicroCom::In){
+        cp->setRegValue(reg,regValue+mryValue);
     }
     else{
-
+        cp->writeBusCycle(phyAddr,regValue+mryValue);
     }
+    return;
 }
 
 
@@ -366,7 +345,7 @@ void MainWindow::out(MicroCom::Regs reg, int addr){
 *****************************************************/
 void MainWindow::pushf(){
     int flagsValue = cp->getRegValue(MicroCom::flags);
-    int stackAddr = getPhyAddr(MicroCom::sp,0)-2;
+    int stackAddr = getPhyAddr({MicroCom::sp})-2;
     int spNewValue = cp->getRegValue(MicroCom::sp)-2;
     cp->setRegValue(MicroCom::sp,spNewValue);
     cp->writeBusCycle(stackAddr,flagsValue);
@@ -380,7 +359,7 @@ void MainWindow::pushf(){
  - Output：SP←(SP+2)
 *****************************************************/
 void MainWindow::popf(){
-    int stackAddr = this->getPhyAddr(MicroCom::sp,0);
+    int stackAddr = this->getPhyAddr({MicroCom::sp});
     int spNewValue = cp->getRegValue(MicroCom::sp)+2;
     int flagsValue = cp->readBusCycle(stackAddr);
     cp->setRegValue(MicroCom::sp,spNewValue);
